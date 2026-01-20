@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 export default function Home() {
   const rooms = [
     { title: "ちょっと一息", desc: "書いてもいいし、書かなくてもいい。" },
