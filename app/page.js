@@ -1,6 +1,14 @@
 import Link from "next/link";
 
 export default function EntryPage() {
+  const roomLinkStyle = {
+    color: "#666",
+    textDecoration: "none",
+    display: "inline-block",
+    padding: "6px 10px",
+    borderRadius: "10px",
+  };
+
   return (
     <main
       style={{
@@ -16,28 +24,14 @@ export default function EntryPage() {
         textAlign: "center",
       }}
     >
-      {/* タイトル */}
-      <h1
-        style={{
-          fontSize: "2.5rem",
-          marginBottom: "0.5rem",
-          fontWeight: "300",
-        }}
-      >
+      <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem", fontWeight: 300 }}>
         PAUSE
       </h1>
 
-      {/* 入口の一文 */}
-      <p
-        style={{
-          marginBottom: "2rem",
-          color: "#666",
-        }}
-      >
+      <p style={{ marginBottom: "2rem", color: "#666" }}>
         くつろいでいってください。
       </p>
 
-      {/* 掲示板へのリンク */}
       <Link
         href="/board"
         style={{
@@ -49,27 +43,28 @@ export default function EntryPage() {
           borderRadius: "30px",
           border: "1px solid #ddd",
           boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-          transition: "all 0.3s ease",
-          marginBottom: "32px",
+          marginBottom: "28px",
         }}
       >
         掲示板の扉をひらく
       </Link>
 
-      {/* 3つの部屋（文字リンクのみ） */}
-      <div style={{ lineHeight: "2" }}>
+      {/* 3つの部屋 */}
+      <div style={{ lineHeight: 2.2 }}>
         <div>
-          <span style={{ color: "#777" }}>よってみた</span>
+          <Link href="/rooms/yottemita" style={roomLinkStyle}>
+            よってみた
+          </Link>
         </div>
         <div>
-          <span style={{ color: "#777" }}>
+          <Link href="/rooms/poem" style={roomLinkStyle}>
             ぽえむ（言ってもいいのよ）
-          </span>
+          </Link>
         </div>
         <div>
-          <span style={{ color: "#777" }}>
+          <Link href="/rooms/manager" style={roomLinkStyle}>
             ちょっと一息（管理人さん）
-          </span>
+          </Link>
         </div>
       </div>
     </main>
