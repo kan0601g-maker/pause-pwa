@@ -1,88 +1,56 @@
-import Link from 'next/link';
+// app/page.js
+"use client";
+import { useState } from 'react';
 
-export default function EntryPage() {
+export default function NurukariPause() {
+  const [content, setContent] = useState("");
+  const [posts, setPosts] = useState([
+    { id: 1, content: "ヌルカリ経済圏へようこそ。まずは深呼吸して。" },
+    { id: 2, content: "ここは、頑張るのを止める場所です。何でもそっと置いていって。" }
+  ]);
+
+  const handlePost = () => {
+    if (!content) return;
+    setPosts([{ id: Date.now(), content }, ...posts]);
+    setContent("");
+  };
+
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#f8f9fa', // 穏やかな薄いグレー
-        color: '#333',
-        fontFamily: 'sans-serif',
-        padding: '20px',
-      }}
-    >
-      {/* タイトル */}
-      <h1
-        style={{
-          fontSize: '2.5rem',
-          marginBottom: '1rem',
-          fontWeight: '300',
-        }}
-      >
-        PAUSE
-      </h1>
+    <main className="min-h-screen bg-[#f5f5f4] text-[#44403c] p-8 sm:p-12">
+      <div className="max-w-md mx-auto">
+        {/* シンプルで美しいヘッダー */}
+        <header className="mb-16 text-center">
+          <h1 className="text-5xl font-extralight tracking-[0.3em] text-[#57534e]">PAUSE</h1>
+          <p className="text-[10px] text-[#a8a29e] mt-4 tracking-[0.4em] uppercase">Nurukari Economy</p>
+        </header>
 
-      {/* メインコンテンツ */}
-      <div
-        style={{
-          textAlign: 'center',
-          opacity: 1,
-          transform: 'none',
-          animation: 'fadeIn 1.5s ease-in',
-        }}
-      >
-        <p
-          style={{
-            marginBottom: '2rem',
-            color: '#666',
-            lineHeight: '1.6',
-          }}
-        >
-          日常のノイズを止めて、
-          <br />
-          静かな対話を始めましょう。
-        </p>
+        {/* 投稿エリア（ここが「石」っぽい質感よ） */}
+        <section className="bg-white p-8 rounded-[2rem] shadow-sm border border-stone-200/50 mb-12">
+          <textarea 
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="今、何を止めてる？"
+            className="w-full h-32 p-0 bg-transparent text-lg outline-none resize-none placeholder:text-stone-300 border-none focus:ring-0"
+          />
+          <div className="flex justify-end mt-4">
+            <button 
+              onClick={handlePost}
+              className="px-10 py-3 bg-[#57534e] text-white rounded-full text-sm font-medium hover:bg-[#44403c] active:scale-95 transition-all shadow-lg shadow-stone-200"
+            >
+              そっと置く
+            </button>
+          </div>
+        </section>
 
-        {/* 掲示板へのリンク */}
-        <Link
-          href="/board"
-          style={{
-            display: 'inline-block',
-            padding: '12px 32px',
-            backgroundColor: '#fff',
-            color: '#555',
-            textDecoration: 'none',
-            borderRadius: '30px',
-            border: '1px solid #ddd',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-            transition: 'all 0.3s ease',
-          }}
-        >
-          掲示板の扉をひらく
-        </Link>
+        {/* 投稿リスト（ふんわり浮いている感じ） */}
+        <div className="space-y-6">
+          {posts.map(post => (
+            <div key={post.id} className="p-6 bg-white/50 border border-white rounded-[1.5rem] shadow-sm backdrop-blur-sm transition-all">
+              <p className="text-[#78716c] leading-relaxed text-sm">{post.content}</p>
+            </div>
+          ))}
+        </div>
       </div>
-
-      {/* フェードインアニメーション */}
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            @keyframes fadeIn {
-              from {
-                opacity: 0;
-                transform: translateY(10px);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-          `,
-        }}
-      />
     </main>
   );
 }
