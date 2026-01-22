@@ -50,17 +50,19 @@ export default function NuruMarketMaster() {
             <h1 className="text-5xl font-black tracking-[0.5em] text-green-400">STAR LEAF</h1>
             <p className="text-xs mt-4 tracking-[0.3em] opacity-80 uppercase">Forces of Broadleaf Rebellion</p>
           </header>
-          <div className="w-full flex justify-between text-[10px] mb-20 px-4">
+          <div className="w-full flex justify-between text-[10px] mb-20 px-4 text-green-500">
             <span>RANK: 広葉樹の騎士</span>
             <span>LEVEL: 12</span>
             <span>PT: 1,500</span>
           </div>
-          <button onClick={startScan} className={`w-64 h-24 border-2 border-green-400 bg-transparent flex items-center justify-center text-xl tracking-[0.2em] shadow-[0_0_20px_rgba(74,222,128,0.5)] ${isScanning ? 'animate-pulse' : ''}`}>
+          <button onClick={startScan} className={`w-64 h-24 border-2 border-green-400 bg-transparent flex items-center justify-center text-xl tracking-[0.2em] shadow-[0_0_20px_rgba(74,222,128,0.5)] ${isScanning ? 'animate-pulse' : ''} text-green-500`}>
             {isScanning ? "SEARCHING..." : "SCANNING START"}
           </button>
           <div className="mt-auto w-full border-2 border-green-500 p-4 text-center">
             <p className="text-[10px] tracking-widest uppercase">Current Threat: Sugi-Vader Level 5</p>
+            <p className="text-[10px] mt-1">山主との同盟関係：良好</p>
           </div>
+          {/* 禁止ワードを修正 */}
           <button onClick={() => setView("house")} className="mt-8 text-xs text-yellow-400 underline italic">
             ヌールマーケットで官給品を調達する >>
           </button>
@@ -96,7 +98,7 @@ export default function NuruMarketMaster() {
         </button>
         <button onClick={() => setView("star-leaf")} className="p-6 bg-emerald-900/20 border border-emerald-500/30 rounded-2xl hover:bg-emerald-900/40 transition-all text-center group">
           <div className="text-2xl mb-1 group-hover:rotate-12 transition-transform">🌿</div>
-          <div className="text-xs font-bold tracking-widest text-emerald-400 italic">STAR LEAF</div>
+          <div className="text-xs font-bold tracking-widest text-emerald-400 italic text-green-500">STAR LEAF</div>
         </button>
       </div>
     </main>
