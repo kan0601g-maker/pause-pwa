@@ -1,54 +1,28 @@
-// app/my-room/page.js
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function MyRoomPage() {
-  const [points, setPoints] = useState(0);
+  const BUILD_TAG = "BUILD_20260123_MYROOM_FIX_01";
 
-  useEffect(() => {
-    try {
-      const key = "nuru_points";
-      const raw = localStorage.getItem(key);
-
-      if (raw === null) {
-        localStorage.setItem(key, "0");
-        setPoints(0);
-        return;
-      }
-
-      const n = Number(raw);
-      setPoints(Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0);
-    } catch {
-      setPoints(0);
-    }
-  }, []);
-
-  const base = {
+  const wrap = {
     minHeight: "100dvh",
     padding: 18,
     boxSizing: "border-box",
-    background: "linear-gradient(180deg, #0b1020 0%, #0a0f1a 55%, #0d1424 100%)",
-    color: "#e6eefc",
-    fontFamily:
-      'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"',
-  };
-
-  const wrap = {
-    maxWidth: 560,
-    margin: "0 auto",
+    fontFamily: "sans-serif",
+    background: "linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)",
+    color: "#0f172a",
   };
 
   const panel = {
+    maxWidth: 560,
+    margin: "0 auto",
     borderRadius: 18,
     padding: 16,
     boxSizing: "border-box",
-    border: "1px solid rgba(230, 238, 252, 0.14)",
-    background: "rgba(12, 18, 36, 0.62)",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.45)",
-    backdropFilter: "blur(8px)",
-    overflow: "hidden", // ★これ追加
+    border: "1px solid rgba(0,0,0,0.1)",
+    background: "rgba(255,255,255,0.9)",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.12)",
   };
 
   const btn = (variant = "solid") => {
@@ -58,95 +32,66 @@ export default function MyRoomPage() {
       justifyContent: "center",
       gap: 8,
       width: "100%",
-      padding: "12px 14px",
+      padding: "14px",
       borderRadius: 14,
-      fontWeight: 650,
-      letterSpacing: "0.2px",
+      fontWeight: 800,
       textDecoration: "none",
       cursor: "pointer",
-      userSelect: "none",
-      lineHeight: 1,
-      boxSizing: "border-box",
+      border: "2px solid",
     };
+
     if (variant === "ghost") {
       return {
         ...common,
         background: "transparent",
-        border: "1px solid rgba(230, 238, 252, 0.18)",
-        color: "#e6eefc",
+        borderColor: "rgba(15,23,42,0.25)",
+        color: "#0f172a",
       };
     }
+
     return {
       ...common,
-      background: "rgba(230, 238, 252, 0.10)",
-      border: "1px solid rgba(230, 238, 252, 0.18)",
-      color: "#e6eefc",
+      background: "#0f172a",
+      borderColor: "#0f172a",
+      color: "#fff",
     };
   };
 
   return (
-    <main style={base}>
-      <div style={wrap}>
-        <header style={{ textAlign: "center", marginTop: 10, marginBottom: 16 }}>
-          <div style={{ fontSize: 28, lineHeight: "28px", marginBottom: 6 }}>🏠</div>
-          <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: "0.4px" }}>MY ROOM</div>
-          <div style={{ marginTop: 8, fontSize: 12, opacity: 0.75 }}>
-            ここは、誰にも見せなくていい場所。
-          </div>
-        </header>
+    <main style={wrap}>
+      <div style={{ maxWidth: 560, margin: "0 auto", textAlign: "center", marginBottom: 16 }}>
+        <div style={{ fontSize: 40 }}>👑</div>
+        <div style={{ fontSize: 20, fontWeight: 900 }}>nuru market</div>
+        <div style={{ fontSize: 10, opacity: 0.5 }}>{BUILD_TAG}</div>
+      </div>
 
-        <section style={panel}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
-            <div style={{ fontWeight: 900, fontSize: 14, opacity: 0.9 }}>NURU POINT</div>
-            <div style={{ fontWeight: 950, fontSize: 20, letterSpacing: "0.3px" }}>
-              {points.toLocaleString("ja-JP")}{" "}
-              <span style={{ fontSize: 14, fontWeight: 800, opacity: 0.9 }}>pt</span>
-            </div>
+      <section style={panel}>
+        <div style={{ display: "grid", gap: 12 }}>
+          <div style={{ fontWeight: 900, fontSize: 18, textAlign: "left" }}>🏠 MY ROOM</div>
+          <div style={{ fontSize: 12, opacity: 0.8, textAlign: "left", lineHeight: 1.6 }}>
+            ここは “あなた専用” の部屋（端末内）。
+            <br />
+            まだメニューだけ置いておくよ。
           </div>
 
-          <div style={{ marginTop: 14, opacity: 0.72, fontSize: 12, lineHeight: 1.7 }}>
-            ※ いまは「表示だけ」。発生条件や使い道は後で決められる器。
-          </div>
+          <Link href="/board" style={btn("ghost")}>
+            🧾 BOARD
+          </Link>
 
-          {/* テーブル（空） */}
-          <div style={{ marginTop: 18 }}>
-            <div style={{ fontWeight: 850, fontSize: 13, opacity: 0.92 }}>TABLE</div>
-            <div
-              style={{
-                marginTop: 10,
-                borderRadius: 16,
-                border: "1px solid rgba(230, 238, 252, 0.14)",
-                background:
-                  "linear-gradient(180deg, rgba(245, 222, 179, 0.18) 0%, rgba(139, 69, 19, 0.18) 100%)",
-                padding: 14,
-                boxSizing: "border-box",
-              }}
-            >
-              <div
-                style={{
-                  height: 140,
-                  borderRadius: 14,
-                  border: "1px dashed rgba(230, 238, 252, 0.22)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  textAlign: "center",
-                  padding: 12,
-                  boxSizing: "border-box",
-                  opacity: 0.85,
-                }}
-              >
-                <div>
-                  <div style={{ fontWeight: 850 }}>まだ、何も置かれていない。</div>
-                  <div style={{ marginTop: 6, fontSize: 12, opacity: 0.75 }}>それでいい。</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Link href="/rooms/echo" style={btn("ghost")}>
+            💬 /rooms/echo（雑談）
+          </Link>
 
-          <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-            <Link href="/" style={btn()}>
-              ← nuru market（HOUSE）へ戻る
-            </Link>
-            <Link hre
+          <Link href="/rooms/starleaf" style={btn("ghost")}>
+            🌿 /rooms/starleaf（世界観）
+          </Link>
+
+          <Link href="/" style={btn()}>
+            ← nuru market（HOUSE）へ戻る
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
+}
 
