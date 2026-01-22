@@ -5,9 +5,10 @@ import { useMemo, useRef, useState } from "react";
 
 export default function Page() {
   // ★反映確認用（あとで消してOK）
-  const BUILD_TAG = "BUILD_20260123_STARREEF_BTN_A";
+  const BUILD_TAG = "BUILD_20260123_STARREEF_BTN_B";
 
-  const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARLEAF"
+  // 画面キーはここで統一：HOUSE / PAUSE / STARREEF
+  const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARREEF"
   const [houseTheme, setHouseTheme] = useState("Nordic"); // "Nordic" | "Spaceship"
 
   // STAR REEF: idle -> opening -> scanning -> ready
@@ -22,7 +23,7 @@ export default function Page() {
   const audioCtxRef = useRef(null);
   const playingRef = useRef(false);
 
-  const OPENING_MS = 9500; // 8〜12秒の範囲内
+  const OPENING_MS = 9500; // 8〜12秒くらい
   const SCANNING_MS = 2000;
 
   const clearStarreefTimers = () => {
@@ -136,7 +137,7 @@ export default function Page() {
 
   const bg = (() => {
     if (screen === "PAUSE") return { background: "#ffffff", color: "#111827" };
-    if (screen === "STARLEAF") return { background: "#050807", color: "#9AF59A" };
+    if (screen === "STARREEF") return { background: "#050807", color: "#9AF59A" };
 
     if (theme === "Nordic") {
       return {
@@ -161,7 +162,7 @@ export default function Page() {
         boxShadow: "0 8px 30px rgba(2, 6, 23, 0.08)",
       };
     }
-    if (screen === "STARLEAF") {
+    if (screen === "STARREEF") {
       return {
         border: "1px solid rgba(154, 245, 154, 0.18)",
         background: "rgba(10, 20, 16, 0.55)",
@@ -221,20 +222,45 @@ export default function Page() {
 
     if (screen === "PAUSE") {
       if (variant === "ghost")
-        return { ...common, background: "transparent", border: "1px solid rgba(17, 24, 39, 0.12)", color: "#111827" };
+        return {
+          ...common,
+          background: "transparent",
+          border: "1px solid rgba(17, 24, 39, 0.12)",
+          color: "#111827",
+        };
       return { ...common, background: "#111827", border: "1px solid #111827", color: "#ffffff" };
     }
 
-    if (screen === "STARLEAF") {
+    if (screen === "STARREEF") {
       if (variant === "ghost")
-        return { ...common, background: "transparent", border: "1px solid rgba(154, 245, 154, 0.22)", color: "#9AF59A" };
-      return { ...common, background: "rgba(154, 245, 154, 0.10)", border: "1px solid rgba(154, 245, 154, 0.30)", color: "#9AF59A" };
+        return {
+          ...common,
+          background: "transparent",
+          border: "1px solid rgba(154, 245, 154, 0.22)",
+          color: "#9AF59A",
+        };
+      return {
+        ...common,
+        background: "rgba(154, 245, 154, 0.10)",
+        border: "1px solid rgba(154, 245, 154, 0.30)",
+        color: "#9AF59A",
+      };
     }
 
     if (variant === "ghost")
-      return { ...common, background: "transparent", border: isNordic ? "1px solid rgba(2, 6, 23, 0.16)" : "1px solid rgba(230, 238, 252, 0.18)", color: isNordic ? "#0f172a" : "#e6eefc" };
+      return {
+        ...common,
+        background: "transparent",
+        border: isNordic ? "1px solid rgba(2, 6, 23, 0.16)" : "1px solid rgba(230, 238, 252, 0.18)",
+        color: isNordic ? "#0f172a" : "#e6eefc",
+      };
 
-    return { ...common, background: isNordic ? "#0f172a" : "rgba(230, 238, 252, 0.10)", border: isNordic ? "1px solid #0f172a" : "1px solid rgba(230, 238, 252, 0.18)", color: isNordic ? "#ffffff" : "#e6eefc" };
+    return {
+      ...common,
+      background: isNordic ? "#0f172a" : "rgba(230, 238, 252, 0.10)",
+      border: isNordic ? "1px solid #0f172a" : "1px solid rgba(230, 238, 252, 0.18)",
+      color: isNordic ? "#ffffff" : "#e6eefc",
+    };
   };
 
   const topTabStyle = (active) => ({
@@ -287,7 +313,7 @@ export default function Page() {
   ];
 
   const goScreen = (next) => {
-    if (next !== "STARLEAF") {
+    if (next !== "STARREEF") {
       clearStarreefTimers();
       stopTheme();
       setStarreefPhase("idle");
@@ -312,16 +338,27 @@ export default function Page() {
           <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "0.4px" }}>nuru market</div>
 
           {/* ★反映確認用（あとで消してOK） */}
-          <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6 }}>{BUILD_TAG}</div>
+          <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6 }}>
+            {BUILD_TAG} / screen={screen}
+          </div>
 
-          <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+          <div
+            style={{
+              marginTop: 10,
+              display: "flex",
+              gap: 8,
+              justifyContent: "center",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
             <button onClick={() => goScreen("HOUSE")} style={topTabStyle(screen === "HOUSE")}>
               <E>🏠</E> <span>HOUSE</span>
             </button>
             <button onClick={() => goScreen("PAUSE")} style={topTabStyle(screen === "PAUSE")}>
               <E>☕</E> <span>PAUSE</span>
             </button>
-            <button onClick={() => goScreen("STARLEAF")} style={topTabStyle(screen === "STARLEAF")}>
+            <button onClick={() => goScreen("STARREEF")} style={topTabStyle(screen === "STARREEF")}>
               <E>🌿</E> <span>STAR REEF</span>
             </button>
           </div>
@@ -353,7 +390,7 @@ export default function Page() {
                   <E>☕</E> <span>PAUSE</span>
                 </button>
 
-                <button onClick={() => goScreen("STARLEAF")} style={btn()}>
+                <button onClick={() => goScreen("STARREEF")} style={btn()}>
                   <E>🌿</E> <span>STAR REEF</span>
                 </button>
 
@@ -396,7 +433,7 @@ export default function Page() {
             </>
           )}
 
-          {screen === "STARLEAF" && (
+          {screen === "STARREEF" && (
             <>
               <div style={{ fontWeight: 900, fontSize: 16, letterSpacing: "0.6px" }}>
                 <E>🌿</E> <span>STAR REEF</span>
@@ -408,7 +445,6 @@ export default function Page() {
                   <E>▶</E> <span>テロップ（音楽付き）</span>
                 </button>
 
-                {/* ゲーム開始：いまは仮で /rooms/starleaf */}
                 <Link href="/rooms/starleaf" style={btn("ghost")}>
                   <E>🎮</E> <span>ゲーム開始</span>
                 </Link>
@@ -516,5 +552,3 @@ export default function Page() {
     </main>
   );
 }
-
-
