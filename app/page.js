@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
-  const [view, setView] = useState("HOUSE");
+  const [view, setView] = useState("HOUSE"); // HOUSE | PAUSE | STAR
 
   const bg = "#05070f";
   const card = "#0b1020";
@@ -41,6 +41,15 @@ export default function Home() {
     color: text,
   };
 
+  const linkBtn = {
+    ...btnBase,
+    textDecoration: "none",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  };
+
   return (
     <div style={shell}>
       {view === "HOUSE" && (
@@ -61,7 +70,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ▼▼ ここがボタンゾーン ▼▼ */}
+          {/* ボタンゾーン */}
           <div
             style={{
               maxWidth: 720,
@@ -79,18 +88,7 @@ export default function Home() {
               🌿 STAR LEAF
             </button>
 
-            {/* ★ ここが BOARD */}
-            <Link
-              href="/board"
-              style={{
-                ...btnBase,
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 6,
-              }}
-            >
+            <Link href="/board" style={linkBtn}>
               🧾 BOARD
             </Link>
           </div>
@@ -109,28 +107,73 @@ export default function Home() {
       )}
 
       {view === "PAUSE" && (
-        <div style={frame}>
-          <button
-            onClick={() => setView("HOUSE")}
-            style={{ ...btnBase, marginBottom: 16 }}
-          >
-            ← HOUSE
-          </button>
-          <div style={{ fontSize: 20, marginBottom: 8 }}>PAUSE</div>
-          <div style={{ color: sub }}>くつろいでいってください。</div>
-        </div>
+        <>
+          <div style={{ textAlign: "center", marginBottom: 18 }}>
+            <div style={{ fontSize: 22, letterSpacing: 4, fontWeight: 700 }}>
+              PAUSE
+            </div>
+            <div style={{ fontSize: 12, color: sub, marginTop: 6 }}>
+              quiet entrance
+            </div>
+          </div>
+
+          <div style={frame}>
+            <button
+              onClick={() => setView("HOUSE")}
+              style={{ ...btnBase, marginBottom: 16 }}
+            >
+              ← HOUSE
+            </button>
+
+            <div style={{ fontSize: 16, marginBottom: 10, color: sub }}>
+              くつろいでいってください。
+            </div>
+
+            {/* ★ 追加：PAUSE内の導線 */}
+            <div
+              style={{
+                display: "grid",
+                gap: 14,
+                justifyItems: "center",
+                marginTop: 12,
+              }}
+            >
+              <Link href="/board" style={{ ...linkBtn, width: "min(420px, 100%)" }}>
+                🧾 BOARD（ひとこと残す）
+              </Link>
+
+              <div style={{ width: "min(520px, 100%)", color: sub, fontSize: 12 }}>
+                「くつろぐ」→「ひとこと置く」への直行導線
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {view === "STAR" && (
-        <div style={frame}>
-          <button
-            onClick={() => setView("HOUSE")}
-            style={{ ...btnBase, marginBottom: 16 }}
-          >
-            ← HOUSE
-          </button>
-          <div style={{ fontSize: 20, color: "#22c55e" }}>STAR LEAF</div>
-        </div>
+        <>
+          <div style={{ textAlign: "center", marginBottom: 18 }}>
+            <div style={{ fontSize: 22, letterSpacing: 4, fontWeight: 700 }}>
+              STAR LEAF
+            </div>
+            <div style={{ fontSize: 12, color: sub, marginTop: 6 }}>
+              scanning zone
+            </div>
+          </div>
+
+          <div style={frame}>
+            <button
+              onClick={() => setView("HOUSE")}
+              style={{ ...btnBase, marginBottom: 16 }}
+            >
+              ← HOUSE
+            </button>
+
+            <div style={{ fontSize: 16, color: "#22c55e" }}>
+              READY.
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
