@@ -5,14 +5,14 @@ import { useMemo, useRef, useState } from "react";
 
 export default function Page() {
   // ★反映確認用（あとで消してOK）
-  const BUILD_TAG = "BUILD_20260123_STARREEF_BTN_B";
+  const BUILD_TAG = "BUILD_20260123_STARLEAF_FIX_1";
 
-  // 画面キーはここで統一：HOUSE / PAUSE / STARREEF
-  const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARREEF"
+  // 画面キーはここで統一：HOUSE / PAUSE / STARLEAF
+  const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARLEAF"
   const [houseTheme, setHouseTheme] = useState("Nordic"); // "Nordic" | "Spaceship"
 
-  // STAR REEF: idle -> opening -> scanning -> ready
-  const [starreefPhase, setStarreefPhase] = useState("idle");
+  // STAR LEAF: idle -> opening -> scanning -> ready
+  const [starleafPhase, setStarleafPhase] = useState("idle");
   const [crawlKey, setCrawlKey] = useState(0);
 
   // タイマー管理
@@ -26,7 +26,7 @@ export default function Page() {
   const OPENING_MS = 9500; // 8〜12秒くらい
   const SCANNING_MS = 2000;
 
-  const clearStarreefTimers = () => {
+  const clearStarleafTimers = () => {
     if (tOpenRef.current) {
       clearTimeout(tOpenRef.current);
       tOpenRef.current = null;
@@ -100,26 +100,26 @@ export default function Page() {
 
   // ▶ テロップ開始（音楽付き）
   const startOpening = () => {
-    clearStarreefTimers();
+    clearStarleafTimers();
 
-    setStarreefPhase("opening");
+    setStarleafPhase("opening");
     setCrawlKey((v) => v + 1);
 
     playTheme();
 
-    tOpenRef.current = setTimeout(() => setStarreefPhase("scanning"), OPENING_MS);
+    tOpenRef.current = setTimeout(() => setStarleafPhase("scanning"), OPENING_MS);
     tReadyRef.current = setTimeout(() => {
-      setStarreefPhase("ready");
+      setStarleafPhase("ready");
       stopTheme();
     }, OPENING_MS + SCANNING_MS);
   };
 
   // スキップ：scanningへ
   const skipToScanning = () => {
-    clearStarreefTimers();
+    clearStarleafTimers();
     stopTheme();
-    setStarreefPhase("scanning");
-    tReadyRef.current = setTimeout(() => setStarreefPhase("ready"), SCANNING_MS);
+    setStarleafPhase("scanning");
+    tReadyRef.current = setTimeout(() => setStarleafPhase("ready"), SCANNING_MS);
   };
 
   const theme = useMemo(() => {
@@ -137,7 +137,7 @@ export default function Page() {
 
   const bg = (() => {
     if (screen === "PAUSE") return { background: "#ffffff", color: "#111827" };
-    if (screen === "STARREEF") return { background: "#050807", color: "#9AF59A" };
+    if (screen === "STARLEAF") return { background: "#050807", color: "#9AF59A" };
 
     if (theme === "Nordic") {
       return {
@@ -162,7 +162,7 @@ export default function Page() {
         boxShadow: "0 8px 30px rgba(2, 6, 23, 0.08)",
       };
     }
-    if (screen === "STARREEF") {
+    if (screen === "STARLEAF") {
       return {
         border: "1px solid rgba(154, 245, 154, 0.18)",
         background: "rgba(10, 20, 16, 0.55)",
@@ -231,7 +231,7 @@ export default function Page() {
       return { ...common, background: "#111827", border: "1px solid #111827", color: "#ffffff" };
     }
 
-    if (screen === "STARREEF") {
+    if (screen === "STARLEAF") {
       if (variant === "ghost")
         return {
           ...common,
@@ -313,10 +313,11 @@ export default function Page() {
   ];
 
   const goScreen = (next) => {
-    if (next !== "STARREEF") {
-      clearStarreefTimers();
+    // STARLEAFから出たら演出をリセット
+    if (next !== "STARLEAF") {
+      clearStarleafTimers();
       stopTheme();
-      setStarreefPhase("idle");
+      setStarleafPhase("idle");
     }
     setScreen(next);
   };
@@ -337,29 +338,20 @@ export default function Page() {
           <div style={{ fontSize: 34, lineHeight: "34px", marginBottom: 6 }}>👑</div>
           <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "0.4px" }}>nuru market</div>
 
-          {/* ★反映確認用（あとで消してOK） */}
+          {/* ★反映・遷移確認 */}
           <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6 }}>
             {BUILD_TAG} / screen={screen}
           </div>
 
-          <div
-            style={{
-              marginTop: 10,
-              display: "flex",
-              gap: 8,
-              justifyContent: "center",
-              alignItems: "center",
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
             <button onClick={() => goScreen("HOUSE")} style={topTabStyle(screen === "HOUSE")}>
               <E>🏠</E> <span>HOUSE</span>
             </button>
             <button onClick={() => goScreen("PAUSE")} style={topTabStyle(screen === "PAUSE")}>
               <E>☕</E> <span>PAUSE</span>
             </button>
-            <button onClick={() => goScreen("STARREEF")} style={topTabStyle(screen === "STARREEF")}>
-              <E>🌿</E> <span>STAR REEF</span>
+            <button onClick={() => goScreen("STARLEAF")} style={topTabStyle(screen === "STARLEAF")}>
+              <E>🌿</E> <span>STAR LEAF</span>
             </button>
           </div>
         </header>
@@ -390,8 +382,8 @@ export default function Page() {
                   <E>☕</E> <span>PAUSE</span>
                 </button>
 
-                <button onClick={() => goScreen("STARREEF")} style={btn()}>
-                  <E>🌿</E> <span>STAR REEF</span>
+                <button onClick={() => goScreen("STARLEAF")} style={btn()}>
+                  <E>🌿</E> <span>STAR LEAF</span>
                 </button>
 
                 <Link href="/board" style={btn("ghost")}>
@@ -433,13 +425,13 @@ export default function Page() {
             </>
           )}
 
-          {screen === "STARREEF" && (
+          {screen === "STARLEAF" && (
             <>
               <div style={{ fontWeight: 900, fontSize: 16, letterSpacing: "0.6px" }}>
-                <E>🌿</E> <span>STAR REEF</span>
+                <E>🌿</E> <span>STAR LEAF</span>
               </div>
 
-              {/* ★テロップ開始 / ゲーム開始（必ずここに出る） */}
+              {/* ★必ず出る：開始ボタン2つ */}
               <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
                 <button onClick={startOpening} style={btn()}>
                   <E>▶</E> <span>テロップ（音楽付き）</span>
@@ -451,7 +443,7 @@ export default function Page() {
               </div>
 
               {/* opening：黄テロップ */}
-              {starreefPhase === "opening" && (
+              {starleafPhase === "opening" && (
                 <div
                   style={{
                     marginTop: 12,
@@ -480,7 +472,7 @@ export default function Page() {
                       willChange: "transform",
                     }}
                   >
-                    <div style={{ fontSize: 13, opacity: 0.95 }}>STAR REEF</div>
+                    <div style={{ fontSize: 13, opacity: 0.95 }}>STAR LEAF</div>
                     <div style={{ fontSize: 16, marginTop: 4 }}>EPISODE</div>
                     <div style={{ fontSize: 18, marginTop: 4 }}>— NEW BREATH —</div>
 
@@ -515,12 +507,12 @@ export default function Page() {
 
               {/* scanning / ready 表示 */}
               <div style={{ marginTop: 12, fontSize: 13, lineHeight: 1.7 }}>
-                {starreefPhase === "scanning" ? (
+                {starleafPhase === "scanning" ? (
                   <div style={{ opacity: 0.92 }}>
                     <div style={{ fontWeight: 850, letterSpacing: "1px" }}>SCANNING START</div>
                     <div style={{ marginTop: 8, opacity: 0.8 }}>……………</div>
                   </div>
-                ) : starreefPhase === "ready" ? (
+                ) : starleafPhase === "ready" ? (
                   <div style={{ opacity: 0.92 }}>
                     <div style={{ fontWeight: 850, letterSpacing: "0.6px" }}>READY</div>
                     <div style={{ marginTop: 6, opacity: 0.8 }}>黒背景・緑文字。ここは演出画面。</div>
@@ -530,10 +522,10 @@ export default function Page() {
                 )}
               </div>
 
-              {starreefPhase === "ready" && (
+              {starleafPhase === "ready" && (
                 <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
                   <Link href="/rooms/starleaf" style={btn()}>
-                    <E>🗣️</E> <span>STAR REEF を語る部屋へ</span>
+                    <E>🗣️</E> <span>STAR LEAF を語る部屋へ</span>
                   </Link>
 
                   <button onClick={() => goScreen("HOUSE")} style={btn("ghost")}>
