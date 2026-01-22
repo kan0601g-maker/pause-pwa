@@ -130,7 +130,6 @@ export default function Page() {
   };
 
   const goScreen = (next) => {
-    // STARLEAF以外へ移動する時は演出をリセット
     if (next !== "STARLEAF") {
       clearStarleafTimers();
       stopTheme();
@@ -346,7 +345,6 @@ export default function Page() {
             <div style={{ display: "grid", gap: 15 }}>
               <div style={{ fontWeight: 900, color: "#9AF59A" }}>🌿 STAR LEAF DECK</div>
 
-              {/* ここは常に出る */}
               <button onClick={startOpening} style={btn()}>
                 ▶ テロップ（音楽付き）
               </button>
