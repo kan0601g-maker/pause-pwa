@@ -1,10 +1,35 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
   const [view, setView] = useState("HOUSE"); // HOUSE | PAUSE | STAR
+
+  // ★ 追加：URLクエリで初期表示を切り替え（例：/?view=PAUSE）
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const v = (sp.get("view") || "").toUpperCase();
+      if (v === "HOUSE" || v === "PAUSE" || v === "STAR") {
+        setView(v);
+      }
+    } catch {}
+  }, []);
+
+  // ★ 追加：画面切替時にURLも更新（キャッシュ錯覚防止にも効く）
+  function go(next) {
+    setView(next);
+    try {
+      const url = new URL(window.location.href);
+      if (next === "HOUSE") {
+        url.searchParams.delete("view");
+      } else {
+        url.searchParams.set("view", next);
+      }
+      window.history.replaceState(null, "", url.toString());
+    } catch {}
+  }
 
   const bg = "#05070f";
   const card = "#0b1020";
@@ -46,10 +71,7 @@ export default function Home() {
     gap: 8,
   };
 
-  const small = {
-    fontSize: 12,
-    color: sub,
-  };
+  const small = { fontSize: 12, color: sub };
 
   return (
     <div style={shell}>
@@ -79,10 +101,10 @@ export default function Home() {
               gap: 18,
             }}
           >
-            <button style={btn} onClick={() => setView("PAUSE")}>
+            <button style={btn} onClick={() => go("PAUSE")}>
               ☕ PAUSE
             </button>
-            <button style={btn} onClick={() => setView("STAR")}>
+            <button style={btn} onClick={() => go("STAR")}>
               🌿 STAR LEAF
             </button>
             <Link href="/board" style={btn}>
@@ -95,7 +117,7 @@ export default function Home() {
       {/* PAUSE */}
       {view === "PAUSE" && (
         <div style={frame}>
-          <button onClick={() => setView("HOUSE")} style={btn}>
+          <button onClick={() => go("HOUSE")} style={btn}>
             ← HOUSE
           </button>
 
@@ -111,7 +133,7 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* ★ 追加：rooms 導線 */}
+          {/* rooms */}
           <div style={{ marginTop: 22 }}>
             <div style={small}>rooms</div>
 
@@ -124,7 +146,7 @@ export default function Home() {
               }}
             >
               <Link href="/rooms/yottemita" style={{ ...btn, width: "min(420px, 100%)" }}>
-                🚪 /rooms/yottemita
+                🧱 /rooms/yottemita
               </Link>
 
               <Link href="/rooms/poem" style={{ ...btn, width: "min(420px, 100%)" }}>
@@ -137,7 +159,7 @@ export default function Home() {
             </div>
 
             <div style={{ ...small, marginTop: 10 }}>
-              ※ rooms はページが未作成なら 404 になります（順次作る）
+              ※ rooms はテンプレで表示（/rooms/[slug]）
             </div>
           </div>
         </div>
@@ -146,7 +168,7 @@ export default function Home() {
       {/* STAR */}
       {view === "STAR" && (
         <div style={frame}>
-          <button onClick={() => setView("HOUSE")} style={btn}>
+          <button onClick={() => go("HOUSE")} style={btn}>
             ← HOUSE
           </button>
           <div style={{ marginTop: 18, color: "#22c55e" }}>STAR LEAF</div>
