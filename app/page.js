@@ -2,23 +2,26 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 export default function Page() {
   const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARLEAF"
   const [houseTheme, setHouseTheme] = useState("Nordic"); // "Nordic" | "Spaceship"
 
-  // STAR REEF: opening -> scanning -> ready
-  const [starreefPhase, setStarreefPhase] = useState("idle"); // "idle" | "opening" | "scanning" | "ready"
-  const [crawlKey, setCrawlKey] = useState(0); // opening再入場でアニメ再起動
+  // STAR REEF: idle -> opening -> scanning -> ready
+  const [starreefPhase, setStarreefPhase] = useState("idle");
+  const [crawlKey, setCrawlKey] = useState(0);
 
-  // タイマー管理（SKIP含め、必ずクリアできるように）
+  // タイマー管理
   const tOpenRef = useRef(null);
   const tReadyRef = useRef(null);
 
-  // オープニングの長さ（8〜12秒）
-  const OPENING_MS = 9500; // 9.5秒
-  const SCANNING_MS = 2000; // 2秒
+  // 音（WebAudio）管理
+  const audioCtxRef = useRef(null);
+  const playingRef = useRef(false);
+
+  const OPENING_MS = 9500; // テロップ時間（8〜12秒内）
+  const SCANNING_MS = 2000;
 
   const clearStarreefTimers = () => {
     if (tOpenRef.current) {
@@ -31,38 +34,109 @@ export default function Page() {
     }
   };
 
-  const startStarreefSequence = () => {
+  // かんたんBGM（ボタン押下で再生される＝自動再生規制を回避）
+  const playTheme = () => {
+    try {
+      if (playingRef.current) return;
+
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const ctx = audioCtxRef.current || new AudioContext();
+      audioCtxRef.current = ctx;
+
+      // iOS/Safari対策：resumedが必要な場合
+      if (ctx.state === "suspended") ctx.resume();
+
+      playingRef.current = true;
+
+      const master = ctx.createGain();
+      master.gain.value = 0.06; // 音量（小さめ）
+      master.connect(ctx.destination);
+
+      // “それっぽい”二音＋ベースの短いループ（OPENING_MSくらいで止める）
+      const startAt = ctx.currentTime + 0.02;
+
+      const makeTone = (freq, t, dur, type = "sine", gain = 0.9) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = type;
+        o.frequency.setValueAtTime(freq, t);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(gain, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g);
+        g.connect(master);
+        o.start(t);
+        o.stop(t + dur + 0.02);
+      };
+
+      // ループパターン（約1.2秒）
+      const pattern = [
+        // lead
+        { f: 440, dt: 0.0, d: 0.28, type: "sawtooth", g: 0.55 },
+        { f: 330, dt: 0.32, d: 0.38, type: "sawtooth", g: 0.55 },
+        { f: 392, dt: 0.78, d: 0.26, type: "sawtooth", g: 0.50 },
+        // bass
+        { f: 110, dt: 0.0, d: 0.55, type: "triangle", g: 0.35 },
+        { f: 98, dt: 0.62, d: 0.55, type: "triangle", g: 0.35 },
+      ];
+
+      const loopLen = 1.2;
+      const loops = Math.ceil((OPENING_MS / 1000) / loopLen);
+
+      for (let i = 0; i < loops; i++) {
+        const baseT = startAt + i * loopLen;
+        for (const p of pattern) {
+          makeTone(p.f, baseT + p.dt, p.d, p.type, p.g);
+        }
+      }
+
+      // 自動停止（OPENING_MS + 少し）
+      window.setTimeout(() => stopTheme(), OPENING_MS + 200);
+    } catch {
+      // 音が出ない環境でも動作は続ける
+    }
+  };
+
+  const stopTheme = () => {
+    try {
+      playingRef.current = false;
+      const ctx = audioCtxRef.current;
+      // ここでcloseまでやると次回が重いので、suspendで十分
+      if (ctx && ctx.state === "running") ctx.suspend();
+    } catch {
+      // ignore
+    }
+  };
+
+  // ▶ テロップ開始（音楽付き）
+  const startOpening = () => {
     clearStarreefTimers();
+
+    // opening開始
     setStarreefPhase("opening");
     setCrawlKey((v) => v + 1);
 
+    // 音スタート（ユーザー操作起点）
+    playTheme();
+
+    // opening終了→scanning→ready
     tOpenRef.current = setTimeout(() => {
       setStarreefPhase("scanning");
     }, OPENING_MS);
 
     tReadyRef.current = setTimeout(() => {
       setStarreefPhase("ready");
+      stopTheme();
     }, OPENING_MS + SCANNING_MS);
   };
 
+  // スキップ：scanningへ（音は止める）
   const skipToScanning = () => {
-    // opening中のタイマーを即終了 → scanning → 2秒後ready
     clearStarreefTimers();
+    stopTheme();
     setStarreefPhase("scanning");
-    tReadyRef.current = setTimeout(() => {
-      setStarreefPhase("ready");
-    }, SCANNING_MS);
+    tReadyRef.current = setTimeout(() => setStarreefPhase("ready"), SCANNING_MS);
   };
-
-  useEffect(() => {
-    if (screen !== "STARLEAF") {
-      clearStarreefTimers();
-      return;
-    }
-    startStarreefSequence();
-    return () => clearStarreefTimers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen]);
 
   const theme = useMemo(() => {
     if (screen !== "HOUSE") return "plain";
@@ -160,55 +234,24 @@ export default function Page() {
       userSelect: "none",
       lineHeight: 1,
       boxSizing: "border-box",
-      transition: "transform 0.06s ease, opacity 0.12s ease",
     };
 
     if (screen === "PAUSE") {
-      if (variant === "ghost") {
-        return {
-          ...common,
-          background: "transparent",
-          border: "1px solid rgba(17, 24, 39, 0.12)",
-          color: "#111827",
-        };
-      }
+      if (variant === "ghost")
+        return { ...common, background: "transparent", border: "1px solid rgba(17, 24, 39, 0.12)", color: "#111827" };
       return { ...common, background: "#111827", border: "1px solid #111827", color: "#ffffff" };
     }
 
     if (screen === "STARLEAF") {
-      if (variant === "ghost") {
-        return {
-          ...common,
-          background: "transparent",
-          border: "1px solid rgba(154, 245, 154, 0.22)",
-          color: "#9AF59A",
-        };
-      }
-      return {
-        ...common,
-        background: "rgba(154, 245, 154, 0.10)",
-        border: "1px solid rgba(154, 245, 154, 0.30)",
-        color: "#9AF59A",
-      };
+      if (variant === "ghost")
+        return { ...common, background: "transparent", border: "1px solid rgba(154, 245, 154, 0.22)", color: "#9AF59A" };
+      return { ...common, background: "rgba(154, 245, 154, 0.10)", border: "1px solid rgba(154, 245, 154, 0.30)", color: "#9AF59A" };
     }
 
-    if (variant === "ghost") {
-      return {
-        ...common,
-        background: "transparent",
-        border: isNordic
-          ? "1px solid rgba(2, 6, 23, 0.16)"
-          : "1px solid rgba(230, 238, 252, 0.18)",
-        color: isNordic ? "#0f172a" : "#e6eefc",
-      };
-    }
+    if (variant === "ghost")
+      return { ...common, background: "transparent", border: isNordic ? "1px solid rgba(2, 6, 23, 0.16)" : "1px solid rgba(230, 238, 252, 0.18)", color: isNordic ? "#0f172a" : "#e6eefc" };
 
-    return {
-      ...common,
-      background: isNordic ? "#0f172a" : "rgba(230, 238, 252, 0.10)",
-      border: isNordic ? "1px solid #0f172a" : "1px solid rgba(230, 238, 252, 0.18)",
-      color: isNordic ? "#ffffff" : "#e6eefc",
-    };
+    return { ...common, background: isNordic ? "#0f172a" : "rgba(230, 238, 252, 0.10)", border: isNordic ? "1px solid #0f172a" : "1px solid rgba(230, 238, 252, 0.18)", color: isNordic ? "#ffffff" : "#e6eefc" };
   };
 
   const topTabStyle = (active) => ({
@@ -260,6 +303,16 @@ export default function Page() {
     "ささやかで確かな反撃の記録である。",
   ];
 
+  // STAR REEFに出入りする時にタイマー停止
+  const goScreen = (next) => {
+    if (next !== "STARLEAF") {
+      clearStarreefTimers();
+      stopTheme();
+      setStarreefPhase("idle");
+    }
+    setScreen(next);
+  };
+
   return (
     <main style={{ ...base, ...bg }}>
       <style>{`
@@ -277,13 +330,13 @@ export default function Page() {
           <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "0.4px" }}>nuru market</div>
 
           <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
-            <button onClick={() => setScreen("HOUSE")} style={topTabStyle(screen === "HOUSE")}>
+            <button onClick={() => goScreen("HOUSE")} style={topTabStyle(screen === "HOUSE")}>
               <E>🏠</E> <span>HOUSE</span>
             </button>
-            <button onClick={() => setScreen("PAUSE")} style={topTabStyle(screen === "PAUSE")}>
+            <button onClick={() => goScreen("PAUSE")} style={topTabStyle(screen === "PAUSE")}>
               <E>☕</E> <span>PAUSE</span>
             </button>
-            <button onClick={() => setScreen("STARLEAF")} style={topTabStyle(screen === "STARLEAF")}>
+            <button onClick={() => goScreen("STARLEAF")} style={topTabStyle(screen === "STARLEAF")}>
               <E>🌿</E> <span>STAR REEF</span>
             </button>
           </div>
@@ -311,11 +364,11 @@ export default function Page() {
                   <E>🏠</E> <span>MY ROOM</span>
                 </Link>
 
-                <button onClick={() => setScreen("PAUSE")} style={btn()}>
+                <button onClick={() => goScreen("PAUSE")} style={btn()}>
                   <E>☕</E> <span>PAUSE</span>
                 </button>
 
-                <button onClick={() => setScreen("STARLEAF")} style={btn()}>
+                <button onClick={() => goScreen("STARLEAF")} style={btn()}>
                   <E>🌿</E> <span>STAR REEF</span>
                 </button>
 
@@ -351,7 +404,7 @@ export default function Page() {
                 <Link href="/rooms/echo" style={btn("ghost")}>/rooms/echo（会話OK）</Link>
                 <Link href="/rooms/starleaf" style={btn("ghost")}>/rooms/starleaf（世界観・会話OK）</Link>
 
-                <button onClick={() => setScreen("HOUSE")} style={btn()}>
+                <button onClick={() => goScreen("HOUSE")} style={btn()}>
                   ← HOUSEへ戻る
                 </button>
               </div>
@@ -364,6 +417,19 @@ export default function Page() {
                 <E>🌿</E> <span>STAR REEF</span>
               </div>
 
+              {/* ★操作ボタン（テロップ開始 / ゲーム開始） */}
+              <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
+                <button onClick={startOpening} style={btn()}>
+                  <E>▶</E> <span>テロップ（音楽付き）</span>
+                </button>
+
+                {/* 今は仮：ゲーム開始＝/rooms/starleaf へ */}
+                <Link href="/rooms/starleaf" style={btn("ghost")}>
+                  <E>🎮</E> <span>ゲーム開始</span>
+                </Link>
+              </div>
+
+              {/* opening：黄テロップ */}
               {starreefPhase === "opening" && (
                 <div
                   style={{
@@ -426,6 +492,7 @@ export default function Page() {
                 </div>
               )}
 
+              {/* scanning / ready 表示 */}
               <div style={{ marginTop: 12, fontSize: 13, lineHeight: 1.7 }}>
                 {starreefPhase === "scanning" ? (
                   <div style={{ opacity: 0.92 }}>
@@ -438,17 +505,20 @@ export default function Page() {
                     <div style={{ marginTop: 6, opacity: 0.8 }}>黒背景・緑文字。ここは演出画面。</div>
                   </div>
                 ) : (
-                  <div style={{ opacity: 0.8 }}>…</div>
+                  <div style={{ opacity: 0.72 }}>
+                    ※ 「テロップ（音楽付き）」はボタンを押して開始
+                  </div>
                 )}
               </div>
 
+              {/* ready後の導線（語る部屋 / 戻る） */}
               {starreefPhase === "ready" && (
                 <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
                   <Link href="/rooms/starleaf" style={btn()}>
                     <E>🗣️</E> <span>STAR REEF を語る部屋へ</span>
                   </Link>
 
-                  <button onClick={() => setScreen("HOUSE")} style={btn("ghost")}>
+                  <button onClick={() => goScreen("HOUSE")} style={btn("ghost")}>
                     ヌールマーケット（HOUSE）へ戻る
                   </button>
                 </div>
@@ -464,4 +534,3 @@ export default function Page() {
     </main>
   );
 }
-
