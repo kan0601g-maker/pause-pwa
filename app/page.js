@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
-  const [view, setView] = useState("HOUSE");
+  const [view, setView] = useState("HOUSE"); // HOUSE | PAUSE | STAR
 
   const bg = "#05070f";
   const card = "#0b1020";
@@ -46,8 +46,14 @@ export default function Home() {
     gap: 8,
   };
 
+  const small = {
+    fontSize: 12,
+    color: sub,
+  };
+
   return (
     <div style={shell}>
+      {/* HOUSE */}
       {view === "HOUSE" && (
         <>
           <div style={{ textAlign: "center", marginBottom: 18 }}>
@@ -86,6 +92,7 @@ export default function Home() {
         </>
       )}
 
+      {/* PAUSE */}
       {view === "PAUSE" && (
         <div style={frame}>
           <button onClick={() => setView("HOUSE")} style={btn}>
@@ -97,23 +104,53 @@ export default function Home() {
             くつろいでいってください。
           </div>
 
-          {/* ★ ここが追加ポイント */}
+          {/* 入口：BOARD */}
           <div style={{ marginTop: 22 }}>
             <Link href="/board" style={btn}>
               🧾 BOARD（ひとこと残す）
             </Link>
           </div>
+
+          {/* ★ 追加：rooms 導線 */}
+          <div style={{ marginTop: 22 }}>
+            <div style={small}>rooms</div>
+
+            <div
+              style={{
+                marginTop: 10,
+                display: "grid",
+                gap: 12,
+                justifyItems: "center",
+              }}
+            >
+              <Link href="/rooms/yottemita" style={{ ...btn, width: "min(420px, 100%)" }}>
+                🚪 /rooms/yottemita
+              </Link>
+
+              <Link href="/rooms/poem" style={{ ...btn, width: "min(420px, 100%)" }}>
+                ✒️ /rooms/poem
+              </Link>
+
+              <Link href="/rooms/manager" style={{ ...btn, width: "min(420px, 100%)" }}>
+                🧑‍✈️ /rooms/manager
+              </Link>
+            </div>
+
+            <div style={{ ...small, marginTop: 10 }}>
+              ※ rooms はページが未作成なら 404 になります（順次作る）
+            </div>
+          </div>
         </div>
       )}
 
+      {/* STAR */}
       {view === "STAR" && (
         <div style={frame}>
           <button onClick={() => setView("HOUSE")} style={btn}>
             ← HOUSE
           </button>
-          <div style={{ marginTop: 18, color: "#22c55e" }}>
-            STAR LEAF
-          </div>
+          <div style={{ marginTop: 18, color: "#22c55e" }}>STAR LEAF</div>
+          <div style={{ marginTop: 6, color: sub, fontSize: 12 }}>READY.</div>
         </div>
       )}
     </div>
