@@ -8,14 +8,24 @@ export default function Page() {
   const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARLEAF"
   const [houseTheme, setHouseTheme] = useState("Nordic"); // "Nordic" | "Spaceship"
 
-  // STAR LEAF 演出
-  const [starleafPhase, setStarleafPhase] = useState("idle"); // "idle" | "scanning" | "ready"
+  // STAR REEF 演出フェーズ
+  // opening(黄テロップ) -> scanning(2秒) -> ready
+  const [starreefPhase, setStarreefPhase] = useState("idle"); // "idle" | "opening" | "scanning" | "ready"
+  const [skipKey, setSkipKey] = useState(0); // アニメ再スタート用
 
   useEffect(() => {
     if (screen !== "STARLEAF") return;
-    setStarleafPhase("scanning");
-    const t = setTimeout(() => setStarleafPhase("ready"), 2000);
-    return () => clearTimeout(t);
+
+    setStarreefPhase("opening");
+    setSkipKey((v) => v + 1);
+
+    const t1 = setTimeout(() => setStarreefPhase("scanning"), 9500); // 黄テロップ時間
+    const t2 = setTimeout(() => setStarreefPhase("ready"), 11500); // scanning 2秒
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, [screen]);
 
   const theme = useMemo(() => {
@@ -42,7 +52,7 @@ export default function Page() {
         color: "#0f172a",
       };
     }
-    // Spaceship（暗→明るめ調整済み）
+    // Spaceship
     return {
       background:
         "radial-gradient(1200px 600px at 20% 10%, rgba(140,180,255,0.25) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, #0b1020 0%, #0a0f1a 55%, #0d1424 100%)",
@@ -70,7 +80,6 @@ export default function Page() {
         boxShadow: "0 8px 30px rgba(0, 0, 0, 0.35)",
       };
     }
-    // HOUSE
     return {
       border:
         theme === "Nordic"
@@ -88,7 +97,6 @@ export default function Page() {
     };
   })();
 
-  // 絵文字を「固定幅の箱」に入れてズレを潰す
   const E = ({ children }) => (
     <span
       style={{
@@ -120,7 +128,7 @@ export default function Page() {
       cursor: "pointer",
       userSelect: "none",
       lineHeight: 1,
-      boxSizing: "border-box", // ★追加
+      boxSizing: "border-box",
       transition: "transform 0.06s ease, opacity 0.12s ease",
     };
 
@@ -158,7 +166,6 @@ export default function Page() {
       };
     }
 
-    // HOUSE
     if (variant === "ghost") {
       return {
         ...common,
@@ -179,7 +186,6 @@ export default function Page() {
     };
   };
 
-  // 上部タブ用
   const topTabStyle = (active) => ({
     display: "inline-flex",
     alignItems: "center",
@@ -194,10 +200,9 @@ export default function Page() {
     fontWeight: 650,
     lineHeight: 1,
     whiteSpace: "nowrap",
-    boxSizing: "border-box", // ★追加
+    boxSizing: "border-box",
   });
 
-  // HOUSE内テーマ切替
   const themeBtnStyle = (active) => ({
     display: "inline-flex",
     alignItems: "center",
@@ -212,11 +217,36 @@ export default function Page() {
     fontWeight: 650,
     lineHeight: 1,
     whiteSpace: "nowrap",
-    boxSizing: "border-box", // ★追加
+    boxSizing: "border-box",
   });
+
+  const openingText = [
+    "遠い昔、",
+    "遥か彼方の山奥で――",
+    "",
+    "スギ帝国は春の空を黄色く染め、",
+    "花粉デス・クラウドで人々の鼻と目を制圧していた。",
+    "",
+    "だが、呼吸を取り戻す者たちがいる。",
+    "広葉樹同盟軍。",
+    "",
+    "これは花粉症対策ではない。",
+    "健やかな呼吸を取り戻すための、",
+    "ささやかで確かな反撃の記録である。",
+  ];
 
   return (
     <main style={{ ...base, ...bg }}>
+      {/* STAR REEF 用：黄テロップアニメの keyframes */}
+      <style>{`
+        @keyframes crawlUp {
+          0% { transform: translateY(62%); opacity: 0; }
+          6% { opacity: 1; }
+          92% { opacity: 1; }
+          100% { transform: translateY(-110%); opacity: 0; }
+        }
+      `}</style>
+
       <div style={card}>
         <header style={{ textAlign: "center", marginTop: 10, marginBottom: 16 }}>
           <div style={{ fontSize: 34, lineHeight: "34px", marginBottom: 6 }}>👑</div>
@@ -252,7 +282,7 @@ export default function Page() {
             borderRadius: 18,
             padding: 16,
             boxSizing: "border-box",
-            overflow: "hidden", // ★これが本命（角丸からはみ出すのを防ぐ）
+            overflow: "hidden",
           }}
         >
           {screen === "HOUSE" && (
@@ -289,14 +319,7 @@ export default function Page() {
                 </Link>
               </div>
 
-              <div
-                style={{
-                  marginTop: 14,
-                  opacity: theme === "Nordic" ? 0.75 : 0.72,
-                  fontSize: 12,
-                  lineHeight: 1.6,
-                }}
-              >
+              <div style={{ marginTop: 14, opacity: theme === "Nordic" ? 0.75 : 0.72, fontSize: 12, lineHeight: 1.6 }}>
                 <div>・ここは公共の場（マーケット）</div>
                 <div>・MY ROOM はあなた専用（端末内）</div>
               </div>
@@ -346,19 +369,82 @@ export default function Page() {
                 <E>🌿</E> <span>STAR REEF</span>
               </div>
 
+              {/* 黄テロップ（opening中だけ表示） */}
+              {starreefPhase === "opening" && (
+                <div
+                  style={{
+                    marginTop: 12,
+                    borderRadius: 16,
+                    border: "1px solid rgba(154, 245, 154, 0.18)",
+                    background: "rgba(0,0,0,0.45)",
+                    overflow: "hidden",
+                    position: "relative",
+                    height: 220,
+                  }}
+                >
+                  <div
+                    key={skipKey}
+                    style={{
+                      position: "absolute",
+                      left: 16,
+                      right: 16,
+                      bottom: -40,
+                      color: "#F6D34A",
+                      fontWeight: 800,
+                      letterSpacing: "0.6px",
+                      lineHeight: 1.55,
+                      textAlign: "center",
+                      transformOrigin: "50% 100%",
+                      animation: "crawlUp 9.5s linear forwards",
+                      textShadow: "0 2px 12px rgba(0,0,0,0.55)",
+                    }}
+                  >
+                    <div style={{ fontSize: 13, opacity: 0.95 }}>STAR REEF</div>
+                    <div style={{ fontSize: 16, marginTop: 4 }}>EPISODE</div>
+                    <div style={{ fontSize: 18, marginTop: 4 }}>―― NEW BREATH ――</div>
+
+                    <div style={{ marginTop: 14, fontSize: 14, opacity: 0.98 }}>
+                      {openingText.map((line, i) => (
+                        <div key={i}>{line || <span>&nbsp;</span>}</div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setStarreefPhase("scanning")}
+                    style={{
+                      position: "absolute",
+                      top: 10,
+                      right: 10,
+                      padding: "8px 10px",
+                      borderRadius: 12,
+                      border: "1px solid rgba(154, 245, 154, 0.22)",
+                      background: "rgba(154, 245, 154, 0.08)",
+                      color: "#9AF59A",
+                      cursor: "pointer",
+                      fontWeight: 700,
+                      lineHeight: 1,
+                    }}
+                  >
+                    SKIP
+                  </button>
+                </div>
+              )}
+
+              {/* 緑演出（scanning/ready） */}
               <div style={{ marginTop: 12, fontSize: 13, lineHeight: 1.7 }}>
-                {starleafPhase === "scanning" ? (
+                {starreefPhase === "scanning" ? (
                   <div style={{ opacity: 0.92 }}>
                     <div style={{ fontWeight: 850, letterSpacing: "1px" }}>SCANNING START</div>
                     <div style={{ marginTop: 8, opacity: 0.8 }}>……………</div>
                   </div>
-                ) : (
+                ) : starreefPhase === "ready" ? (
                   <div style={{ opacity: 0.92 }}>
                     <div style={{ fontWeight: 850, letterSpacing: "0.6px" }}>READY</div>
-                    <div style={{ marginTop: 6, opacity: 0.8 }}>
-                      黒背景・緑文字。ここは演出画面。
-                    </div>
+                    <div style={{ marginTop: 6, opacity: 0.8 }}>黒背景・緑文字。ここは演出画面。</div>
                   </div>
+                ) : (
+                  <div style={{ opacity: 0.8 }}>…</div>
                 )}
               </div>
 
