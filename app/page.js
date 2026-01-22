@@ -72,10 +72,18 @@ export default function Page() {
     }
     // HOUSE
     return {
-      border: theme === "Nordic" ? "1px solid rgba(2, 6, 23, 0.10)" : "1px solid rgba(230, 238, 252, 0.12)",
+      border:
+        theme === "Nordic"
+          ? "1px solid rgba(2, 6, 23, 0.10)"
+          : "1px solid rgba(230, 238, 252, 0.12)",
       background:
-        theme === "Nordic" ? "rgba(255,255,255,0.78)" : "rgba(12, 18, 36, 0.62)",
-      boxShadow: theme === "Nordic" ? "0 10px 30px rgba(2, 6, 23, 0.10)" : "0 10px 40px rgba(0,0,0,0.45)",
+        theme === "Nordic"
+          ? "rgba(255,255,255,0.78)"
+          : "rgba(12, 18, 36, 0.62)",
+      boxShadow:
+        theme === "Nordic"
+          ? "0 10px 30px rgba(2, 6, 23, 0.10)"
+          : "0 10px 40px rgba(0,0,0,0.45)",
       backdropFilter: "blur(8px)",
     };
   })();
@@ -95,6 +103,7 @@ export default function Page() {
       textDecoration: "none",
       cursor: "pointer",
       userSelect: "none",
+      lineHeight: 1,
       transition: "transform 0.06s ease, opacity 0.12s ease",
     };
 
@@ -137,23 +146,55 @@ export default function Page() {
       return {
         ...common,
         background: "transparent",
-        border: isNordic ? "1px solid rgba(2, 6, 23, 0.16)" : "1px solid rgba(230, 238, 252, 0.18)",
+        border: isNordic
+          ? "1px solid rgba(2, 6, 23, 0.16)"
+          : "1px solid rgba(230, 238, 252, 0.18)",
         color: isNordic ? "#0f172a" : "#e6eefc",
       };
     }
     return {
       ...common,
       background: isNordic ? "#0f172a" : "rgba(230, 238, 252, 0.10)",
-      border: isNordic ? "1px solid #0f172a" : "1px solid rgba(230, 238, 252, 0.18)",
+      border: isNordic
+        ? "1px solid #0f172a"
+        : "1px solid rgba(230, 238, 252, 0.18)",
       color: isNordic ? "#ffffff" : "#e6eefc",
     };
   };
 
-  const smallLink = {
-    textDecoration: "none",
+  // 上部タブ用（絵文字ズレ対策）
+  const topTabStyle = (active) => ({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    padding: "8px 12px",
+    borderRadius: 999,
+    border: "1px solid rgba(255,255,255,0.0)",
+    background: active ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)",
     color: "inherit",
-    opacity: 0.9,
-  };
+    cursor: "pointer",
+    fontWeight: 650,
+    lineHeight: 1,
+    whiteSpace: "nowrap",
+  });
+
+  // HOUSE内テーマ切替（絵文字無しでもズレる環境あるので同じ対策）
+  const themeBtnStyle = (active) => ({
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    padding: "8px 10px",
+    borderRadius: 12,
+    border: "1px solid rgba(255,255,255,0.0)",
+    background: active ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.06)",
+    color: "inherit",
+    cursor: "pointer",
+    fontWeight: 650,
+    lineHeight: 1,
+    whiteSpace: "nowrap",
+  });
 
   return (
     <main style={{ ...base, ...bg }}>
@@ -164,48 +205,24 @@ export default function Page() {
             nuru market
           </div>
 
-          <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-            <button
-              onClick={() => setScreen("HOUSE")}
-              style={{
-                padding: "8px 10px",
-                borderRadius: 999,
-                border: "1px solid rgba(255,255,255,0.0)",
-                background: screen === "HOUSE" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)",
-                color: "inherit",
-                cursor: "pointer",
-                fontWeight: 650,
-              }}
-            >
-              🏠 HOUSE
+          <div
+            style={{
+              marginTop: 10,
+              display: "flex",
+              gap: 8,
+              justifyContent: "center",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <button onClick={() => setScreen("HOUSE")} style={topTabStyle(screen === "HOUSE")}>
+              🏠 <span>HOUSE</span>
             </button>
-            <button
-              onClick={() => setScreen("PAUSE")}
-              style={{
-                padding: "8px 10px",
-                borderRadius: 999,
-                border: "1px solid rgba(255,255,255,0.0)",
-                background: screen === "PAUSE" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)",
-                color: "inherit",
-                cursor: "pointer",
-                fontWeight: 650,
-              }}
-            >
-              ☕ PAUSE
+            <button onClick={() => setScreen("PAUSE")} style={topTabStyle(screen === "PAUSE")}>
+              ☕ <span>PAUSE</span>
             </button>
-            <button
-              onClick={() => setScreen("STARLEAF")}
-              style={{
-                padding: "8px 10px",
-                borderRadius: 999,
-                border: "1px solid rgba(255,255,255,0.0)",
-                background: screen === "STARLEAF" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)",
-                color: "inherit",
-                cursor: "pointer",
-                fontWeight: 650,
-              }}
-            >
-              🌿 STAR REEF
+            <button onClick={() => setScreen("STARLEAF")} style={topTabStyle(screen === "STARLEAF")}>
+              🌿 <span>STAR REEF</span>
             </button>
           </div>
         </header>
@@ -222,35 +239,11 @@ export default function Page() {
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                 <div style={{ fontWeight: 800, fontSize: 16 }}>🏠 HOUSE</div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button
-                    onClick={() => setHouseTheme("Nordic")}
-                    style={{
-                      padding: "8px 10px",
-                      borderRadius: 12,
-                      border: "1px solid rgba(255,255,255,0.0)",
-                      background:
-                        houseTheme === "Nordic" ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.06)",
-                      color: "inherit",
-                      cursor: "pointer",
-                      fontWeight: 650,
-                    }}
-                  >
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <button onClick={() => setHouseTheme("Nordic")} style={themeBtnStyle(houseTheme === "Nordic")}>
                     Nordic（明）
                   </button>
-                  <button
-                    onClick={() => setHouseTheme("Spaceship")}
-                    style={{
-                      padding: "8px 10px",
-                      borderRadius: 12,
-                      border: "1px solid rgba(255,255,255,0.0)",
-                      background:
-                        houseTheme === "Spaceship" ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.06)",
-                      color: "inherit",
-                      cursor: "pointer",
-                      fontWeight: 650,
-                    }}
-                  >
+                  <button onClick={() => setHouseTheme("Spaceship")} style={themeBtnStyle(houseTheme === "Spaceship")}>
                     Spaceship（暗）
                   </button>
                 </div>
@@ -324,18 +317,12 @@ export default function Page() {
                 {starleafPhase === "scanning" ? (
                   <div style={{ opacity: 0.92 }}>
                     <div style={{ fontWeight: 850, letterSpacing: "1px" }}>SCANNING START</div>
-                    <div style={{ marginTop: 8, opacity: 0.8 }}>
-                      ……………
-                    </div>
+                    <div style={{ marginTop: 8, opacity: 0.8 }}>……………</div>
                   </div>
                 ) : (
                   <div style={{ opacity: 0.92 }}>
-                    <div style={{ fontWeight: 850, letterSpacing: "0.6px" }}>
-                      READY
-                    </div>
-                    <div style={{ marginTop: 6, opacity: 0.8 }}>
-                      黒背景・緑文字。ここは演出画面。
-                    </div>
+                    <div style={{ fontWeight: 850, letterSpacing: "0.6px" }}>READY</div>
+                    <div style={{ marginTop: 6, opacity: 0.8 }}>黒背景・緑文字。ここは演出画面。</div>
                   </div>
                 )}
               </div>
@@ -351,9 +338,7 @@ export default function Page() {
               </div>
 
               <div style={{ marginTop: 14, fontSize: 12, opacity: 0.72 }}>
-                <span style={{ ...smallLink }}>
-                  ※ 雑談は /rooms/echo、世界観は /rooms/starleaf
-                </span>
+                ※ 雑談は /rooms/echo、世界観は /rooms/starleaf
               </div>
             </>
           )}
