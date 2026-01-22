@@ -1,43 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function Page() {
-  const BUILD_TAG = "BUILD_20260123_STARLEAF_WORKING_01";
+  const BUILD_TAG = "BUILD_20260123_STARLEAF_TICKER_BTN_ALWAYS";
 
-  // 画面キー：HOUSE / PAUSE / STARLEAF
-  const [screen, setScreen] = useState("HOUSE");
-  const [houseTheme, setHouseTheme] = useState("Nordic");
+  // 画面キーは固定（表示名は自由）
+  const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARLEAF"
+  const [houseTheme, setHouseTheme] = useState("Nordic"); // "Nordic" | "Spaceship"
 
   // STAR LEAF 演出：idle -> opening -> scanning -> ready
   const [starleafPhase, setStarleafPhase] = useState("idle");
   const [crawlKey, setCrawlKey] = useState(0);
 
+  // timers
   const tOpenRef = useRef(null);
   const tReadyRef = useRef(null);
 
-  // 音（WebAudio）
+  // WebAudio
   const audioCtxRef = useRef(null);
   const playingRef = useRef(false);
 
-  const OPENING_MS = 9500;
+  const OPENING_MS = 9500; // 8〜12秒帯
   const SCANNING_MS = 2000;
 
-  const openingLines = [
-    "遠い昔、",
-    "遥か彼方の山奥で――",
-    "",
-    "スギ帝国は春の空を黄色く染め、",
-    "花粉デス・クラウドで人々の鼻と目を制圧していた。",
-    "",
-    "だが、呼吸を取り戻す者たちがいる。",
-    "広葉樹同盟軍。",
-    "",
-    "これは花粉症対策ではない。",
-    "健やかな呼吸を取り戻すための、",
-    "ささやかで確かな反撃の記録である。",
-  ];
+  const openingLines = useMemo(
+    () => [
+      "遠い昔、遥か彼方の山奥で…",
+      "",
+      "春になると、スギ帝国（The Cedar Empire）が",
+      "花粉デス・クラウドを放ち、人々の鼻と目は絶望した。",
+      "",
+      "しかし、広葉樹同盟軍（Broadleaf Alliance）は",
+      "『健やかな呼吸（The Oxygen）』を取り戻すため立ち上がる。",
+      "",
+      "あなたのスマホは “スマート・セーバー”。",
+      "見えない敵をスキャンし、この茶番…いえ、サーガを始めよ。",
+      "",
+      "―― STAR WOODS：EP4『新たなる鼻炎』",
+    ],
+    []
+  );
 
   const clearStarleafTimers = () => {
     if (tOpenRef.current) {
@@ -59,9 +63,9 @@ export default function Page() {
   };
 
   const playTheme = () => {
+    // ユーザー操作（ボタン）から呼ばれる前提：ブラウザ制限を回避
     try {
       if (playingRef.current) return;
-
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       const ctx = audioCtxRef.current || new AudioContext();
       audioCtxRef.current = ctx;
@@ -80,15 +84,19 @@ export default function Page() {
         const g = ctx.createGain();
         o.type = type;
         o.frequency.setValueAtTime(freq, t);
+
         g.gain.setValueAtTime(0.0001, t);
         g.gain.exponentialRampToValueAtTime(gain, t + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
         o.connect(g);
         g.connect(master);
+
         o.start(t);
         o.stop(t + dur + 0.02);
       };
 
+      // それっぽい短いパターン（著作権メロディは避ける）
       const pattern = [
         { f: 440, dt: 0.0, d: 0.28, type: "sawtooth", g: 0.55 },
         { f: 330, dt: 0.32, d: 0.38, type: "sawtooth", g: 0.55 },
@@ -111,10 +119,15 @@ export default function Page() {
 
   const startOpening = () => {
     clearStarleafTimers();
+
+    // まず opening にして、テロップを必ず描画
     setStarleafPhase("opening");
     setCrawlKey((v) => v + 1);
+
+    // BGMはここで開始（ユーザー操作中）
     playTheme();
 
+    // opening -> scanning -> ready
     tOpenRef.current = setTimeout(() => setStarleafPhase("scanning"), OPENING_MS);
     tReadyRef.current = setTimeout(() => {
       setStarleafPhase("ready");
@@ -129,14 +142,22 @@ export default function Page() {
     tReadyRef.current = setTimeout(() => setStarleafPhase("ready"), SCANNING_MS);
   };
 
+  const resetStarleaf = () => {
+    clearStarleafTimers();
+    stopTheme();
+    setStarleafPhase("idle");
+  };
+
   const goScreen = (next) => {
-    if (next !== "STARLEAF") {
-      clearStarleafTimers();
-      stopTheme();
-      setStarleafPhase("idle");
-    }
+    resetStarleaf();
     setScreen(next);
   };
+
+  // 画面を抜けたら演出止める
+  useEffect(() => {
+    if (screen !== "STARLEAF") resetStarleaf();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
 
   const theme = useMemo(() => (screen !== "HOUSE" ? "plain" : houseTheme), [screen, houseTheme]);
 
@@ -158,13 +179,8 @@ export default function Page() {
     padding: 16,
     boxSizing: "border-box",
     overflow: "hidden",
-    border: screen === "STARLEAF" ? "1px solid rgba(154,245,154,0.22)" : "1px solid rgba(0,0,0,0.10)",
-    background:
-      screen === "STARLEAF"
-        ? "rgba(10, 20, 16, 0.55)"
-        : theme === "Nordic"
-        ? "rgba(255,255,255,0.90)"
-        : "rgba(12, 18, 36, 0.75)",
+    border: screen === "PAUSE" || theme === "Nordic" ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.15)",
+    background: screen === "PAUSE" || theme === "Nordic" ? "rgba(255,255,255,0.9)" : "rgba(12, 18, 36, 0.75)",
     boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
     backdropFilter: "blur(10px)",
   };
@@ -182,7 +198,7 @@ export default function Page() {
       textDecoration: "none",
       cursor: "pointer",
       border: "2px solid",
-      boxSizing: "border-box",
+      userSelect: "none",
     };
 
     if (screen === "PAUSE") {
@@ -197,16 +213,16 @@ export default function Page() {
     if (screen === "STARLEAF") {
       return {
         ...common,
-        background: variant === "ghost" ? "transparent" : "rgba(154, 245, 154, 0.20)",
-        borderColor: "rgba(154, 245, 154, 0.50)",
+        background: variant === "ghost" ? "transparent" : "rgba(154, 245, 154, 0.22)",
+        borderColor: "rgba(154, 245, 154, 0.55)",
         color: "#9AF59A",
       };
     }
 
     return {
       ...common,
-      background: variant === "ghost" ? "transparent" : theme === "Nordic" ? "#0f172a" : "rgba(230, 238, 252, 0.20)",
-      borderColor: theme === "Nordic" ? "#0f172a" : "rgba(230, 238, 252, 0.40)",
+      background: variant === "ghost" ? "transparent" : theme === "Nordic" ? "#0f172a" : "rgba(230, 238, 252, 0.22)",
+      borderColor: theme === "Nordic" ? "#0f172a" : "rgba(230, 238, 252, 0.42)",
       color: variant === "ghost" ? (theme === "Nordic" ? "#0f172a" : "#e6eefc") : theme === "Nordic" ? "#fff" : "#e6eefc",
     };
   };
@@ -217,31 +233,19 @@ export default function Page() {
     fontWeight: 900,
     cursor: "pointer",
     border: "2px solid",
-    borderColor: active
-      ? screen === "STARLEAF"
-        ? "rgba(154,245,154,0.75)"
-        : theme === "Nordic"
-        ? "#0f172a"
-        : "rgba(230,238,252,0.65)"
-      : "rgba(128,128,128,0.30)",
-    background: active
-      ? screen === "STARLEAF"
-        ? "rgba(154,245,154,0.14)"
-        : theme === "Nordic"
-        ? "#0f172a"
-        : "rgba(255,255,255,0.12)"
-      : "transparent",
-    color: active ? (theme === "Nordic" && screen !== "STARLEAF" ? "#fff" : "inherit") : "inherit",
+    borderColor: active ? (theme === "Nordic" ? "#0f172a" : "#9AF59A") : "rgba(128,128,128,0.3)",
+    background: active ? (theme === "Nordic" ? "#0f172a" : "rgba(255,255,255,0.18)") : "transparent",
+    color: active ? "#fff" : "inherit",
   });
 
   return (
     <main style={{ minHeight: "100dvh", padding: 18, boxSizing: "border-box", fontFamily: "sans-serif", ...bg }}>
       <style>{`
         @keyframes crawlUp {
-          0% { transform: translateY(80%); opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { transform: translateY(-120%); opacity: 0; }
+          0%   { transform: translateY(85%); opacity: 0; }
+          8%   { opacity: 1; }
+          92%  { opacity: 1; }
+          100% { transform: translateY(-140%); opacity: 0; }
         }
       `}</style>
 
@@ -249,11 +253,7 @@ export default function Page() {
         <header style={{ textAlign: "center", marginBottom: 20 }}>
           <div style={{ fontSize: 40 }}>👑</div>
           <div style={{ fontSize: 20, fontWeight: 900 }}>nuru market</div>
-
-          {/* 反映確認 */}
-          <div style={{ fontSize: 11, opacity: 0.6, marginTop: 4 }}>
-            {BUILD_TAG} / screen={screen}
-          </div>
+          <div style={{ fontSize: 10, opacity: 0.5 }}>{BUILD_TAG}</div>
 
           <div style={{ marginTop: 15, display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
             <button onClick={() => goScreen("HOUSE")} style={topTabStyle(screen === "HOUSE")}>
@@ -279,11 +279,11 @@ export default function Page() {
                     style={{
                       padding: "6px 10px",
                       borderRadius: 10,
-                      border: "1px solid rgba(0,0,0,0.25)",
-                      background: houseTheme === "Nordic" ? "#0f172a" : "transparent",
+                      border: "1px solid",
+                      background: houseTheme === "Nordic" ? "#000" : "transparent",
                       color: houseTheme === "Nordic" ? "#fff" : "inherit",
-                      cursor: "pointer",
                       fontWeight: 800,
+                      cursor: "pointer",
                     }}
                   >
                     Nordic
@@ -293,11 +293,11 @@ export default function Page() {
                     style={{
                       padding: "6px 10px",
                       borderRadius: 10,
-                      border: "1px solid rgba(0,0,0,0.25)",
-                      background: houseTheme === "Spaceship" ? "rgba(255,255,255,0.9)" : "transparent",
-                      color: houseTheme === "Spaceship" ? "#0b1020" : "inherit",
-                      cursor: "pointer",
+                      border: "1px solid",
+                      background: houseTheme === "Spaceship" ? "#fff" : "transparent",
+                      color: houseTheme === "Spaceship" ? "#000" : "inherit",
                       fontWeight: 800,
+                      cursor: "pointer",
                     }}
                   >
                     Spaceship
@@ -335,6 +335,13 @@ export default function Page() {
               <Link href="/rooms/manager" style={btn("ghost")}>
                 /rooms/manager
               </Link>
+              <Link href="/rooms/echo" style={btn("ghost")}>
+                /rooms/echo（雑談OK）
+              </Link>
+              <Link href="/rooms/starleaf" style={btn("ghost")}>
+                /rooms/starleaf（世界観）
+              </Link>
+
               <button onClick={() => goScreen("HOUSE")} style={btn()}>
                 🏠 HOUSEに戻る
               </button>
@@ -342,16 +349,19 @@ export default function Page() {
           )}
 
           {screen === "STARLEAF" && (
-            <div style={{ display: "grid", gap: 15 }}>
+            <div style={{ display: "grid", gap: 14 }}>
               <div style={{ fontWeight: 900, color: "#9AF59A" }}>🌿 STAR LEAF DECK</div>
 
+              {/* ここは常に表示：ボタンが消える事故をなくす */}
               <button onClick={startOpening} style={btn()}>
-                ▶ テロップ（音楽付き）
+                ▶ テロップ開始（BGM）
               </button>
+
               <Link href="/rooms/starleaf" style={btn("ghost")}>
-                🎮 ゲーム開始
+                🎮 ゲーム開始（/rooms/starleaf）
               </Link>
 
+              {/* opening */}
               {starleafPhase === "opening" && (
                 <div
                   style={{
@@ -360,7 +370,7 @@ export default function Page() {
                     position: "relative",
                     overflow: "hidden",
                     borderRadius: 15,
-                    border: "2px solid rgba(154,245,154,0.55)",
+                    border: "2px solid rgba(154,245,154,0.65)",
                   }}
                 >
                   <div
@@ -371,19 +381,16 @@ export default function Page() {
                       textAlign: "center",
                       color: "#F6D34A",
                       animation: `crawlUp ${OPENING_MS}ms linear forwards`,
-                      padding: 20,
+                      padding: 18,
                       boxSizing: "border-box",
-                      fontWeight: 900,
-                      letterSpacing: "0.4px",
-                      lineHeight: 1.6,
+                      fontWeight: 700,
                     }}
                   >
-                    <div style={{ fontSize: 18 }}>EPISODE</div>
-                    <div style={{ fontSize: 22, marginTop: 4 }}>— NEW BREATH —</div>
-
-                    <div style={{ marginTop: 18, fontSize: 14, fontWeight: 800 }}>
+                    <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: 1 }}>STAR WOODS</div>
+                    <div style={{ fontSize: 14, opacity: 0.9, marginTop: 6 }}>EPISODE 4 / 新たなる鼻炎</div>
+                    <div style={{ marginTop: 14, fontSize: 14, lineHeight: 1.7 }}>
                       {openingLines.map((l, i) => (
-                        <div key={i}>{l === "" ? <span>&nbsp;</span> : l}</div>
+                        <div key={i}>{l === "" ? "\u00A0" : l}</div>
                       ))}
                     </div>
                   </div>
@@ -394,13 +401,13 @@ export default function Page() {
                       position: "absolute",
                       top: 10,
                       right: 10,
-                      background: "rgba(154,245,154,0.18)",
+                      background: "rgba(154,245,154,0.25)",
                       color: "#9AF59A",
-                      border: "1px solid rgba(154,245,154,0.55)",
+                      border: "1px solid rgba(154,245,154,0.6)",
                       borderRadius: 10,
-                      padding: "7px 10px",
-                      cursor: "pointer",
+                      padding: "6px 10px",
                       fontWeight: 900,
+                      cursor: "pointer",
                     }}
                   >
                     SKIP
@@ -408,17 +415,30 @@ export default function Page() {
                 </div>
               )}
 
-              {starleafPhase === "scanning" && <div style={{ textAlign: "center", padding: 18 }}>📡 SCANNING...</div>}
+              {/* scanning */}
+              {starleafPhase === "scanning" && (
+                <div style={{ textAlign: "center", padding: 16, border: "1px solid rgba(154,245,154,0.35)", borderRadius: 14 }}>
+                  📡 SCANNING...
+                </div>
+              )}
 
+              {/* ready */}
               {starleafPhase === "ready" && (
                 <div style={{ display: "grid", gap: 10 }}>
                   <div style={{ textAlign: "center", fontWeight: 900 }}>✅ READY</div>
                   <Link href="/rooms/starleaf" style={btn()}>
-                    🗣️ STAR LEAFを語る部屋
+                    🗣️ STAR LEAF を語る部屋へ
                   </Link>
                   <button onClick={() => goScreen("HOUSE")} style={btn("ghost")}>
-                    🏠 HOUSEに戻る
+                    🏠 ヌルマーケット（HOUSE）へ戻る
                   </button>
+                </div>
+              )}
+
+              {/* idle */}
+              {starleafPhase === "idle" && (
+                <div style={{ fontSize: 12, opacity: 0.9 }}>
+                  ※ 「▶ テロップ開始」を押すと opening → scanning → ready に進む（スキップ可）
                 </div>
               )}
             </div>
@@ -428,3 +448,4 @@ export default function Page() {
     </main>
   );
 }
+
