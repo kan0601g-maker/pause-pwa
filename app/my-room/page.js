@@ -21,7 +21,6 @@ export default function MyRoomPage() {
       const n = Number(raw);
       setPoints(Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0);
     } catch {
-      // localStorage が使えない環境でも落ちないように
       setPoints(0);
     }
   }, []);
@@ -49,6 +48,7 @@ export default function MyRoomPage() {
     background: "rgba(12, 18, 36, 0.62)",
     boxShadow: "0 10px 40px rgba(0,0,0,0.45)",
     backdropFilter: "blur(8px)",
+    overflow: "hidden", // ★これ追加
   };
 
   const btn = (variant = "solid") => {
@@ -65,6 +65,8 @@ export default function MyRoomPage() {
       textDecoration: "none",
       cursor: "pointer",
       userSelect: "none",
+      lineHeight: 1,
+      boxSizing: "border-box",
     };
     if (variant === "ghost") {
       return {
@@ -97,7 +99,8 @@ export default function MyRoomPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
             <div style={{ fontWeight: 900, fontSize: 14, opacity: 0.9 }}>NURU POINT</div>
             <div style={{ fontWeight: 950, fontSize: 20, letterSpacing: "0.3px" }}>
-              {points.toLocaleString("ja-JP")} <span style={{ fontSize: 14, fontWeight: 800, opacity: 0.9 }}>pt</span>
+              {points.toLocaleString("ja-JP")}{" "}
+              <span style={{ fontSize: 14, fontWeight: 800, opacity: 0.9 }}>pt</span>
             </div>
           </div>
 
@@ -116,6 +119,7 @@ export default function MyRoomPage() {
                 background:
                   "linear-gradient(180deg, rgba(245, 222, 179, 0.18) 0%, rgba(139, 69, 19, 0.18) 100%)",
                 padding: 14,
+                boxSizing: "border-box",
               }}
             >
               <div
@@ -144,12 +148,5 @@ export default function MyRoomPage() {
             <Link href="/" style={btn()}>
               ← nuru market（HOUSE）へ戻る
             </Link>
-            <Link href="/board" style={btn("ghost")}>
-              🧾 BOARD を見る
-            </Link>
-          </div>
-        </section>
-      </div>
-    </main>
-  );
-}
+            <Link hre
+
