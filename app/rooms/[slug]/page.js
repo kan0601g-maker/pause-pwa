@@ -169,7 +169,7 @@ export default function RoomSlugPage() {
     );
   }
 
-  // ========== yottemita（白テーマ：ここは“完成”＝ひとこと保存） ==========
+  // ========== yottemita（白テーマ：完成＝ひとこと保存） ==========
   const YOTTE_KEY = "PAUSE_YOTTE_POSTS_V1";
 
   const yotteLead = useMemo(
@@ -184,7 +184,6 @@ export default function RoomSlugPage() {
   const [yotteText, setYotteText] = useState("");
   const [yottePosts, setYottePosts] = useState([]);
 
-  // localStorage 読み込み
   useEffect(() => {
     if (!isYotte) return;
     try {
@@ -196,7 +195,6 @@ export default function RoomSlugPage() {
     }
   }, [isYotte]);
 
-  // localStorage 保存
   function saveYotte(next) {
     setYottePosts(next);
     try {
@@ -212,7 +210,7 @@ export default function RoomSlugPage() {
       text: t,
       ts: Date.now(),
     };
-    const next = [item, ...yottePosts].slice(0, 200); // 念のため上限
+    const next = [item, ...yottePosts].slice(0, 200);
     saveYotte(next);
     setYotteText("");
   }
@@ -253,7 +251,6 @@ export default function RoomSlugPage() {
               ))}
             </div>
 
-            {/* 入力 */}
             <div style={{ marginTop: 22, ...whiteCard }}>
               <div style={{ fontWeight: 700, marginBottom: 10 }}>
                 ひとこと（端末内保存）
@@ -315,7 +312,6 @@ export default function RoomSlugPage() {
               </div>
             </div>
 
-            {/* 一覧 */}
             <div style={{ marginTop: 18, ...whiteCard }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ fontWeight: 700 }}>ログ</div>
@@ -380,7 +376,6 @@ export default function RoomSlugPage() {
               )}
             </div>
 
-            {/* 戻る */}
             <div style={{ marginTop: 18, display: "flex", gap: 10, flexWrap: "wrap" }}>
               <Link href="/?view=PAUSE" style={whiteBtn}>
                 入口へ戻る
@@ -480,3 +475,4 @@ export default function RoomSlugPage() {
     </div>
   );
 }
+
