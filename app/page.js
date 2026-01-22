@@ -1,3 +1,5 @@
+console.log("PAGE_JS_UPDATED_20260123");
+
 // app/page.js
 "use client";
 
