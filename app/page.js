@@ -20,7 +20,7 @@ export default function Page() {
   const audioCtxRef = useRef(null);
   const playingRef = useRef(false);
 
-  const OPENING_MS = 9500; // テロップ時間（8〜12秒内）
+  const OPENING_MS = 9500; // 8〜12秒の範囲
   const SCANNING_MS = 2000;
 
   const clearStarreefTimers = () => {
@@ -34,7 +34,15 @@ export default function Page() {
     }
   };
 
-  // かんたんBGM（ボタン押下で再生される＝自動再生規制を回避）
+  const stopTheme = () => {
+    try {
+      playingRef.current = false;
+      const ctx = audioCtxRef.current;
+      if (ctx && ctx.state === "running") ctx.suspend();
+    } catch {}
+  };
+
+  // かんたんBGM（ボタン押下で再生＝自動再生規制回避）
   const playTheme = () => {
     try {
       if (playingRef.current) return;
@@ -43,16 +51,13 @@ export default function Page() {
       const ctx = audioCtxRef.current || new AudioContext();
       audioCtxRef.current = ctx;
 
-      // iOS/Safari対策：resumedが必要な場合
       if (ctx.state === "suspended") ctx.resume();
-
       playingRef.current = true;
 
       const master = ctx.createGain();
-      master.gain.value = 0.06; // 音量（小さめ）
+      master.gain.value = 0.06; // 小さめ
       master.connect(ctx.destination);
 
-      // “それっぽい”二音＋ベースの短いループ（OPENING_MSくらいで止める）
       const startAt = ctx.currentTime + 0.02;
 
       const makeTone = (freq, t, dur, type = "sine", gain = 0.9) => {
@@ -69,13 +74,11 @@ export default function Page() {
         o.stop(t + dur + 0.02);
       };
 
-      // ループパターン（約1.2秒）
+      // それっぽいループ（約1.2秒）
       const pattern = [
-        // lead
         { f: 440, dt: 0.0, d: 0.28, type: "sawtooth", g: 0.55 },
         { f: 330, dt: 0.32, d: 0.38, type: "sawtooth", g: 0.55 },
         { f: 392, dt: 0.78, d: 0.26, type: "sawtooth", g: 0.50 },
-        // bass
         { f: 110, dt: 0.0, d: 0.55, type: "triangle", g: 0.35 },
         { f: 98, dt: 0.62, d: 0.55, type: "triangle", g: 0.35 },
       ];
@@ -85,52 +88,30 @@ export default function Page() {
 
       for (let i = 0; i < loops; i++) {
         const baseT = startAt + i * loopLen;
-        for (const p of pattern) {
-          makeTone(p.f, baseT + p.dt, p.d, p.type, p.g);
-        }
+        for (const p of pattern) makeTone(p.f, baseT + p.dt, p.d, p.type, p.g);
       }
 
-      // 自動停止（OPENING_MS + 少し）
       window.setTimeout(() => stopTheme(), OPENING_MS + 200);
-    } catch {
-      // 音が出ない環境でも動作は続ける
-    }
-  };
-
-  const stopTheme = () => {
-    try {
-      playingRef.current = false;
-      const ctx = audioCtxRef.current;
-      // ここでcloseまでやると次回が重いので、suspendで十分
-      if (ctx && ctx.state === "running") ctx.suspend();
-    } catch {
-      // ignore
-    }
+    } catch {}
   };
 
   // ▶ テロップ開始（音楽付き）
   const startOpening = () => {
     clearStarreefTimers();
 
-    // opening開始
     setStarreefPhase("opening");
     setCrawlKey((v) => v + 1);
 
-    // 音スタート（ユーザー操作起点）
     playTheme();
 
-    // opening終了→scanning→ready
-    tOpenRef.current = setTimeout(() => {
-      setStarreefPhase("scanning");
-    }, OPENING_MS);
-
+    tOpenRef.current = setTimeout(() => setStarreefPhase("scanning"), OPENING_MS);
     tReadyRef.current = setTimeout(() => {
       setStarreefPhase("ready");
       stopTheme();
     }, OPENING_MS + SCANNING_MS);
   };
 
-  // スキップ：scanningへ（音は止める）
+  // スキップ：scanningへ
   const skipToScanning = () => {
     clearStarreefTimers();
     stopTheme();
@@ -303,7 +284,6 @@ export default function Page() {
     "ささやかで確かな反撃の記録である。",
   ];
 
-  // STAR REEFに出入りする時にタイマー停止
   const goScreen = (next) => {
     if (next !== "STARLEAF") {
       clearStarreefTimers();
@@ -417,31 +397,20 @@ export default function Page() {
                 <E>🌿</E> <span>STAR REEF</span>
               </div>
 
-              {/* ★操作ボタン（テロップ開始 / ゲーム開始） */}
+              {/* 操作：テロップ開始 / ゲーム開始 */}
               <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
                 <button onClick={startOpening} style={btn()}>
                   <E>▶</E> <span>テロップ（音楽付き）</span>
                 </button>
 
-                {/* 今は仮：ゲーム開始＝/rooms/starleaf へ */}
+                {/* ゲーム開始：いまは仮で /rooms/starleaf */}
                 <Link href="/rooms/starleaf" style={btn("ghost")}>
                   <E>🎮</E> <span>ゲーム開始</span>
                 </Link>
               </div>
 
-              {/* opening：黄テロップ */}
               {starreefPhase === "opening" && (
-                <div
-                  style={{
-                    marginTop: 12,
-                    borderRadius: 16,
-                    border: "1px solid rgba(154, 245, 154, 0.18)",
-                    background: "rgba(0,0,0,0.45)",
-                    overflow: "hidden",
-                    position: "relative",
-                    height: 220,
-                  }}
-                >
+                <div style={{ marginTop: 12, borderRadius: 16, border: "1px solid rgba(154, 245, 154, 0.18)", background: "rgba(0,0,0,0.45)", overflow: "hidden", position: "relative", height: 220 }}>
                   <div
                     key={crawlKey}
                     style={{
@@ -470,29 +439,12 @@ export default function Page() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={skipToScanning}
-                    style={{
-                      position: "absolute",
-                      top: 10,
-                      right: 10,
-                      padding: "8px 10px",
-                      borderRadius: 12,
-                      border: "1px solid rgba(154, 245, 154, 0.22)",
-                      background: "rgba(154, 245, 154, 0.08)",
-                      color: "#9AF59A",
-                      cursor: "pointer",
-                      fontWeight: 700,
-                      lineHeight: 1,
-                      boxSizing: "border-box",
-                    }}
-                  >
+                  <button onClick={skipToScanning} style={{ position: "absolute", top: 10, right: 10, padding: "8px 10px", borderRadius: 12, border: "1px solid rgba(154, 245, 154, 0.22)", background: "rgba(154, 245, 154, 0.08)", color: "#9AF59A", cursor: "pointer", fontWeight: 700, lineHeight: 1, boxSizing: "border-box" }}>
                     SKIP
                   </button>
                 </div>
               )}
 
-              {/* scanning / ready 表示 */}
               <div style={{ marginTop: 12, fontSize: 13, lineHeight: 1.7 }}>
                 {starreefPhase === "scanning" ? (
                   <div style={{ opacity: 0.92 }}>
@@ -505,13 +457,10 @@ export default function Page() {
                     <div style={{ marginTop: 6, opacity: 0.8 }}>黒背景・緑文字。ここは演出画面。</div>
                   </div>
                 ) : (
-                  <div style={{ opacity: 0.72 }}>
-                    ※ 「テロップ（音楽付き）」はボタンを押して開始
-                  </div>
+                  <div style={{ opacity: 0.72 }}>※ ボタンで開始</div>
                 )}
               </div>
 
-              {/* ready後の導線（語る部屋 / 戻る） */}
               {starreefPhase === "ready" && (
                 <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
                   <Link href="/rooms/starleaf" style={btn()}>
@@ -534,3 +483,4 @@ export default function Page() {
     </main>
   );
 }
+
