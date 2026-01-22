@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-const STORAGE_KEY = "pause_board_posts_v2";
+const STORAGE_KEY = "pause_board_posts_v3";
 const NAME_KEY = "pause_board_name_v1";
 
 function safeParse(json, fallback) {
@@ -30,8 +30,21 @@ function formatJST(iso) {
 
 function sanitizeName(s) {
   const t = (s ?? "").trim().replace(/\s+/g, " ");
-  // 長すぎ事故防止
   return t.slice(0, 24);
+}
+
+function normalizePosts(list) {
+  if (!Array.isArray(list)) return [];
+  return list
+    .filter((p) => p && typeof p === "object")
+    .map((p) => ({
+      id: String(p.id ?? Date.now()),
+      name: sanitizeName(p.name) || "匿名",
+      body: String(p.body ?? ""),
+      createdAt: String(p.createdAt ?? nowISO()),
+      pinned: Boolean(p.pinned),
+    }))
+    .filter((p) => p.body.trim().length > 0);
 }
 
 export default function BoardPage() {
@@ -41,7 +54,7 @@ export default function BoardPage() {
   const [posts, setPosts] = useState([]);
   const [text, setText] = useState("");
 
-  // 初回ロード：名前＆投稿を読む
+  // 初回ロード
   useEffect(() => {
     setMounted(true);
 
@@ -50,17 +63,29 @@ export default function BoardPage() {
       setName(sanitizeName(savedName) || "匿名");
     }
 
-    const savedPosts = safeParse(localStorage.getItem(STORAGE_KEY) || "[]", []);
-    if (Array.isArray(savedPosts)) setPosts(savedPosts);
+    const savedPosts = normalizePosts(
+      safeParse(localStorage.getItem(STORAGE_KEY) || "[]", [])
+    );
+
+    // ピンが複数あった場合は先頭だけ残す（安全）
+    let pinnedSeen = false;
+    const fixed = savedPosts.map((p) => {
+      if (!p.pinned) return p;
+      if (pinnedSeen) return { ...p, pinned: false };
+      pinnedSeen = true;
+      return p;
+    });
+
+    setPosts(fixed);
   }, []);
 
-  // 名前を保存
+  // 名前保存
   useEffect(() => {
     if (!mounted) return;
     localStorage.setItem(NAME_KEY, sanitizeName(name) || "匿名");
   }, [mounted, name]);
 
-  // 投稿を保存
+  // 投稿保存
   useEffect(() => {
     if (!mounted) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
@@ -77,6 +102,7 @@ export default function BoardPage() {
       name: sanitizeName(name) || "匿名",
       body,
       createdAt: nowISO(),
+      pinned: false,
     };
 
     setPosts((prev) => [item, ...prev]);
@@ -91,6 +117,33 @@ export default function BoardPage() {
     if (!confirm("掲示板の投稿を全削除します。よろしいですか？")) return;
     setPosts([]);
   }
+
+  function togglePin(id) {
+    setPosts((prev) => {
+      const target = prev.find((p) => p.id === id);
+      if (!target) return prev;
+
+      const willPin = !target.pinned;
+
+      // 1件だけルール：ピンするなら他は全部解除
+      const next = prev.map((p) => {
+        if (p.id === id) return { ...p, pinned: willPin };
+        if (willPin && p.pinned) return { ...p, pinned: false };
+        return p;
+      });
+
+      return next;
+    });
+  }
+
+  const pinnedPost = useMemo(
+    () => posts.find((p) => p.pinned) ?? null,
+    [posts]
+  );
+  const normalPosts = useMemo(
+    () => posts.filter((p) => !p.pinned),
+    [posts]
+  );
 
   const bg = "#ffffff";
   const fg = "#111111";
@@ -144,7 +197,7 @@ export default function BoardPage() {
 
         <h1 style={{ marginTop: 18, marginBottom: 6, fontSize: 22 }}>/board</h1>
         <div style={{ marginBottom: 12, color: "#6b7280", fontSize: 13 }}>
-          匿名・端末内保存（localStorage）／ハンドル固定（端末内）
+          匿名・端末内保存（localStorage）／固定メモ（📌）は1件だけ
         </div>
 
         {/* ハンドル欄 */}
@@ -242,9 +295,36 @@ export default function BoardPage() {
           </div>
         </div>
 
+        {/* 📌固定メモ */}
+        <div style={{ marginTop: 14 }}>
+          {pinnedPost ? (
+            <PostCard
+              post={pinnedPost}
+              border={border}
+              fg={fg}
+              pinnedStyle
+              onDelete={() => removePost(pinnedPost.id)}
+              onTogglePin={() => togglePin(pinnedPost.id)}
+            />
+          ) : (
+            <div
+              style={{
+                border: `1px dashed ${border}`,
+                borderRadius: 14,
+                padding: 14,
+                color: "#6b7280",
+                fontSize: 13,
+                background: "#fff",
+              }}
+            >
+              📌 固定メモはまだありません。投稿を作って「📌 固定する」を押すと一番上に固定されます。
+            </div>
+          )}
+        </div>
+
         {/* 一覧 */}
-        <div style={{ marginTop: 16 }}>
-          {posts.length === 0 ? (
+        <div style={{ marginTop: 10 }}>
+          {normalPosts.length === 0 ? (
             <div
               style={{
                 border: `1px dashed ${border}`,
@@ -252,60 +332,21 @@ export default function BoardPage() {
                 padding: 16,
                 color: "#6b7280",
                 fontSize: 14,
+                marginTop: 10,
               }}
             >
               まだ投稿はありません。
             </div>
           ) : (
-            posts.map((p) => (
-              <div
+            normalPosts.map((p) => (
+              <PostCard
                 key={p.id}
-                style={{
-                  border: `1px solid ${border}`,
-                  borderRadius: 14,
-                  padding: 14,
-                  background: "#fff",
-                  marginBottom: 10,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ fontSize: 13, color: "#111827" }}>
-                    <b>{p.name || "匿名"}</b>
-                  </div>
-                  <div style={{ color: "#6b7280", fontSize: 12 }}>
-                    {formatJST(p.createdAt)}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 10,
-                    whiteSpace: "pre-wrap",
-                    fontSize: 15,
-                    lineHeight: 1.6,
-                  }}
-                >
-                  {p.body}
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", marginTop: 10 }}>
-                  <div style={{ flex: 1 }} />
-                  <button
-                    onClick={() => removePost(p.id)}
-                    style={{
-                      border: `1px solid ${border}`,
-                      background: "#fff",
-                      color: fg,
-                      padding: "6px 10px",
-                      borderRadius: 10,
-                      fontSize: 12,
-                      cursor: "pointer",
-                    }}
-                  >
-                    削除
-                  </button>
-                </div>
-              </div>
+                post={p}
+                border={border}
+                fg={fg}
+                onDelete={() => removePost(p.id)}
+                onTogglePin={() => togglePin(p.id)}
+              />
             ))
           )}
         </div>
@@ -316,4 +357,85 @@ export default function BoardPage() {
       </div>
     </div>
   );
+}
+
+function PostCard({ post, border, fg, onDelete, onTogglePin, pinnedStyle }) {
+  return (
+    <div
+      style={{
+        border: `1px solid ${border}`,
+        borderRadius: 14,
+        padding: 14,
+        background: pinnedStyle ? "#f8fafc" : "#fff",
+        marginBottom: 10,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ fontSize: 13, color: "#111827" }}>
+          <b>{post.name || "匿名"}</b>
+          {post.pinned ? <span style={{ marginLeft: 8 }}>📌</span> : null}
+        </div>
+        <div style={{ color: "#6b7280", fontSize: 12 }}>
+          {formatJST(post.createdAt)}
+        </div>
+        <div style={{ flex: 1 }} />
+        <button
+          onClick={onTogglePin}
+          style={{
+            border: `1px solid ${border}`,
+            background: "#fff",
+            color: fg,
+            padding: "6px 10px",
+            borderRadius: 10,
+            fontSize: 12,
+            cursor: "pointer",
+          }}
+          title="固定は1件だけ"
+        >
+          {post.pinned ? "固定解除" : "📌 固定する"}
+        </button>
+        <button
+          onClick={onDelete}
+          style={{
+            border: `1px solid ${border}`,
+            background: "#fff",
+            color: fg,
+            padding: "6px 10px",
+            borderRadius: 10,
+            fontSize: 12,
+            cursor: "pointer",
+          }}
+        >
+          削除
+        </button>
+      </div>
+
+      <div
+        style={{
+          marginTop: 10,
+          whiteSpace: "pre-wrap",
+          fontSize: 15,
+          lineHeight: 1.6,
+        }}
+      >
+        {post.body}
+      </div>
+
+      {post.pinned ? (
+        <div style={{ marginTop: 10, color: "#6b7280", fontSize: 12 }}>
+          この投稿は固定メモとして一番上に表示されます。
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+// formatJST をコンポーネント外から使うために再定義（Nextの最適化事故回避）
+function formatJST(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+  } catch {
+    return iso;
+  }
 }
