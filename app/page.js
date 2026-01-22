@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function Page() {
   const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARLEAF"
@@ -11,33 +11,58 @@ export default function Page() {
   // STAR REEF: opening -> scanning -> ready
   const [starreefPhase, setStarreefPhase] = useState("idle"); // "idle" | "opening" | "scanning" | "ready"
   const [crawlKey, setCrawlKey] = useState(0); // opening再入場でアニメ再起動
-  const [timersSeed, setTimersSeed] = useState(0); // 再入場で確実にタイマー更新
 
-  // オープニングの長さ（8〜12秒の範囲で調整）
+  // タイマー管理（SKIP含め、必ずクリアできるように）
+  const tOpenRef = useRef(null);
+  const tReadyRef = useRef(null);
+
+  // オープニングの長さ（8〜12秒）
   const OPENING_MS = 9500; // 9.5秒
   const SCANNING_MS = 2000; // 2秒
 
-  useEffect(() => {
-    if (screen !== "STARLEAF") return;
+  const clearStarreefTimers = () => {
+    if (tOpenRef.current) {
+      clearTimeout(tOpenRef.current);
+      tOpenRef.current = null;
+    }
+    if (tReadyRef.current) {
+      clearTimeout(tReadyRef.current);
+      tReadyRef.current = null;
+    }
+  };
 
-    // 入った瞬間に必ず opening から開始
+  const startStarreefSequence = () => {
+    clearStarreefTimers();
     setStarreefPhase("opening");
     setCrawlKey((v) => v + 1);
-    setTimersSeed((v) => v + 1);
 
-    const t1 = setTimeout(() => {
+    tOpenRef.current = setTimeout(() => {
       setStarreefPhase("scanning");
     }, OPENING_MS);
 
-    const t2 = setTimeout(() => {
+    tReadyRef.current = setTimeout(() => {
       setStarreefPhase("ready");
     }, OPENING_MS + SCANNING_MS);
+  };
 
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, [screen, timersSeed]);
+  const skipToScanning = () => {
+    // opening中のタイマーを即終了 → scanning → 2秒後ready
+    clearStarreefTimers();
+    setStarreefPhase("scanning");
+    tReadyRef.current = setTimeout(() => {
+      setStarreefPhase("ready");
+    }, SCANNING_MS);
+  };
+
+  useEffect(() => {
+    if (screen !== "STARLEAF") {
+      clearStarreefTimers();
+      return;
+    }
+    startStarreefSequence();
+    return () => clearStarreefTimers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
 
   const theme = useMemo(() => {
     if (screen !== "HOUSE") return "plain";
@@ -56,14 +81,12 @@ export default function Page() {
     if (screen === "PAUSE") return { background: "#ffffff", color: "#111827" };
     if (screen === "STARLEAF") return { background: "#050807", color: "#9AF59A" };
 
-    // HOUSE
     if (theme === "Nordic") {
       return {
         background: "linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)",
         color: "#0f172a",
       };
     }
-    // Spaceship（暗→明るめ）
     return {
       background:
         "radial-gradient(1200px 600px at 20% 10%, rgba(140,180,255,0.25) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, #0b1020 0%, #0a0f1a 55%, #0d1424 100%)",
@@ -71,10 +94,7 @@ export default function Page() {
     };
   })();
 
-  const card = {
-    maxWidth: 560,
-    margin: "0 auto",
-  };
+  const card = { maxWidth: 560, margin: "0 auto" };
 
   const panel = (() => {
     if (screen === "PAUSE") {
@@ -91,7 +111,6 @@ export default function Page() {
         boxShadow: "0 8px 30px rgba(0, 0, 0, 0.35)",
       };
     }
-    // HOUSE
     return {
       border:
         theme === "Nordic"
@@ -109,7 +128,6 @@ export default function Page() {
     };
   })();
 
-  // 絵文字を固定幅で揃える
   const E = ({ children }) => (
     <span
       style={{
@@ -154,12 +172,7 @@ export default function Page() {
           color: "#111827",
         };
       }
-      return {
-        ...common,
-        background: "#111827",
-        border: "1px solid #111827",
-        color: "#ffffff",
-      };
+      return { ...common, background: "#111827", border: "1px solid #111827", color: "#ffffff" };
     }
 
     if (screen === "STARLEAF") {
@@ -179,7 +192,6 @@ export default function Page() {
       };
     }
 
-    // HOUSE
     if (variant === "ghost") {
       return {
         ...common,
@@ -233,7 +245,6 @@ export default function Page() {
     boxSizing: "border-box",
   });
 
-  // 黄テロップ本文（ここは後で差し替えOK）
   const openingLines = [
     "遠い昔、",
     "遥か彼方の山奥で――",
@@ -251,7 +262,6 @@ export default function Page() {
 
   return (
     <main style={{ ...base, ...bg }}>
-      {/* STAR REEF: 黄テロップ用 keyframes（CSSアニメ） */}
       <style>{`
         @keyframes crawlUp {
           0%   { transform: translateY(62%); opacity: 0; }
@@ -264,20 +274,9 @@ export default function Page() {
       <div style={card}>
         <header style={{ textAlign: "center", marginTop: 10, marginBottom: 16 }}>
           <div style={{ fontSize: 34, lineHeight: "34px", marginBottom: 6 }}>👑</div>
-          <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "0.4px" }}>
-            nuru market
-          </div>
+          <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "0.4px" }}>nuru market</div>
 
-          <div
-            style={{
-              marginTop: 10,
-              display: "flex",
-              gap: 8,
-              justifyContent: "center",
-              alignItems: "center",
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
             <button onClick={() => setScreen("HOUSE")} style={topTabStyle(screen === "HOUSE")}>
               <E>🏠</E> <span>HOUSE</span>
             </button>
@@ -290,15 +289,7 @@ export default function Page() {
           </div>
         </header>
 
-        <section
-          style={{
-            ...panel,
-            borderRadius: 18,
-            padding: 16,
-            boxSizing: "border-box",
-            overflow: "hidden", // 角丸はみ出し防止
-          }}
-        >
+        <section style={{ ...panel, borderRadius: 18, padding: 16, boxSizing: "border-box", overflow: "hidden" }}>
           {screen === "HOUSE" && (
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
@@ -354,21 +345,11 @@ export default function Page() {
                   <E>🧾</E> <span>/board</span>
                 </Link>
 
-                <Link href="/rooms/yottemita" style={btn("ghost")}>
-                  /rooms/yottemita
-                </Link>
-                <Link href="/rooms/poem" style={btn("ghost")}>
-                  /rooms/poem
-                </Link>
-                <Link href="/rooms/manager" style={btn("ghost")}>
-                  /rooms/manager
-                </Link>
-                <Link href="/rooms/echo" style={btn("ghost")}>
-                  /rooms/echo（会話OK）
-                </Link>
-                <Link href="/rooms/starleaf" style={btn("ghost")}>
-                  /rooms/starleaf（世界観・会話OK）
-                </Link>
+                <Link href="/rooms/yottemita" style={btn("ghost")}>/rooms/yottemita</Link>
+                <Link href="/rooms/poem" style={btn("ghost")}>/rooms/poem</Link>
+                <Link href="/rooms/manager" style={btn("ghost")}>/rooms/manager</Link>
+                <Link href="/rooms/echo" style={btn("ghost")}>/rooms/echo（会話OK）</Link>
+                <Link href="/rooms/starleaf" style={btn("ghost")}>/rooms/starleaf（世界観・会話OK）</Link>
 
                 <button onClick={() => setScreen("HOUSE")} style={btn()}>
                   ← HOUSEへ戻る
@@ -383,7 +364,6 @@ export default function Page() {
                 <E>🌿</E> <span>STAR REEF</span>
               </div>
 
-              {/* opening：黄テロップ */}
               {starreefPhase === "opening" && (
                 <div
                   style={{
@@ -424,9 +404,8 @@ export default function Page() {
                     </div>
                   </div>
 
-                  {/* スキップ */}
                   <button
-                    onClick={() => setStarreefPhase("scanning")}
+                    onClick={skipToScanning}
                     style={{
                       position: "absolute",
                       top: 10,
@@ -447,7 +426,6 @@ export default function Page() {
                 </div>
               )}
 
-              {/* scanning / ready */}
               <div style={{ marginTop: 12, fontSize: 13, lineHeight: 1.7 }}>
                 {starreefPhase === "scanning" ? (
                   <div style={{ opacity: 0.92 }}>
@@ -464,7 +442,6 @@ export default function Page() {
                 )}
               </div>
 
-              {/* ready前は導線を出さない（儀式の間は邪魔しない） */}
               {starreefPhase === "ready" && (
                 <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
                   <Link href="/rooms/starleaf" style={btn()}>
