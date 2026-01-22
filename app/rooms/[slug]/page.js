@@ -4,9 +4,18 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
+function getSlugFromParams(p) {
+  // p.slug が string の場合
+  if (typeof p?.slug === "string") return p.slug;
+  // p.slug が配列の場合（まれにこう来る）
+  if (Array.isArray(p?.slug) && typeof p.slug[0] === "string") return p.slug[0];
+  // それでもダメなら空
+  return "";
+}
+
 export default function RoomSlugPage() {
-  const params = useParams();
-  const slug = (params?.slug || "").toString();
+  const p = useParams();
+  const slug = getSlugFromParams(p);
 
   const isPoem = slug === "poem";
   const isYotte = slug === "yottemita";
@@ -96,7 +105,26 @@ export default function RoomSlugPage() {
     background: "#f9fafb",
   };
 
-  // ========== poem（白テーマ：入力欄は“何も起きない”） ==========
+  // 画面確認用（あとで消せる）
+  const debugPill = (
+    <div
+      style={{
+        position: "fixed",
+        right: 12,
+        bottom: 12,
+        padding: "6px 10px",
+        borderRadius: 999,
+        fontSize: 12,
+        background: "rgba(0,0,0,0.55)",
+        color: "#fff",
+        zIndex: 9999,
+      }}
+    >
+      slug={slug || "(empty)"}
+    </div>
+  );
+
+  // ========== poem ==========
   const poemLead = useMemo(
     () => [
       "意味にならなくても、言っていい。",
@@ -109,6 +137,7 @@ export default function RoomSlugPage() {
   if (isPoem) {
     return (
       <div style={whiteShell}>
+        {debugPill}
         <div style={whiteWrap}>
           <div style={{ textAlign: "left", marginTop: 12 }}>
             <div style={{ fontSize: 32, fontWeight: 700 }}>
@@ -131,7 +160,6 @@ export default function RoomSlugPage() {
               </div>
             </div>
 
-            {/* 何も起きない入力欄（保存なし） */}
             <div style={{ marginTop: 18, ...whiteCard }}>
               <div style={{ fontWeight: 700, marginBottom: 10 }}>
                 そっと置いていい場所
@@ -169,7 +197,7 @@ export default function RoomSlugPage() {
     );
   }
 
-  // ========== yottemita（白テーマ：完成＝ひとこと保存） ==========
+  // ========== yottemita ==========
   const YOTTE_KEY = "PAUSE_YOTTE_POSTS_V1";
 
   const yotteLead = useMemo(
@@ -241,6 +269,7 @@ export default function RoomSlugPage() {
   if (isYotte) {
     return (
       <div style={whiteShell}>
+        {debugPill}
         <div style={whiteWrap}>
           <div style={{ textAlign: "left", marginTop: 12 }}>
             <div style={{ fontSize: 32, fontWeight: 700 }}>よってみた</div>
@@ -408,6 +437,7 @@ export default function RoomSlugPage() {
 
   return (
     <div style={shell}>
+      {debugPill}
       <div style={{ textAlign: "center", marginBottom: 18 }}>
         <div style={{ fontSize: 22, letterSpacing: 4, fontWeight: 700 }}>
           ROOM
@@ -475,4 +505,3 @@ export default function RoomSlugPage() {
     </div>
   );
 }
-
