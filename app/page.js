@@ -1,352 +1,288 @@
 "use client";
 
-import { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-export default function NuruMarketMaster() {
-  const [view, setView] = useState("house");
-  const [theme, setTheme] = useState("spaceship");
-  const [isScanning, setIsScanning] = useState(false);
+export default function Home() {
+  const [view, setView] = useState("HOUSE"); // HOUSE | PAUSE | STAR
+  const [theme, setTheme] = useState("NORDIC"); // NORDIC | SPACESHIP
+  const [scanning, setScanning] = useState(false);
+  const [scanMsg, setScanMsg] = useState("");
 
-  const startScan = () => {
-    setIsScanning(true);
-    setTimeout(() => setIsScanning(false), 2000);
-  };
-
-  const toggleTheme = () => {
-    setTheme((t) => (t === "nordic" ? "spaceship" : "nordic"));
-  };
-
-  // 共通：丸いボタン（最小）
-  const pillBtn = (extra = {}) => ({
-    display: "inline-block",
-    padding: "10px 22px",
-    backgroundColor: "#fff",
-    color: "#555",
-    textDecoration: "none",
-    borderRadius: "999px",
-    border: "1px solid #ddd",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-    cursor: "pointer",
-    ...extra,
-  });
-
-  // 共通：カードボタン
-  const cardBtn = (extra = {}) => ({
-    padding: "18px",
-    borderRadius: "22px",
-    border: "1px solid rgba(255,255,255,0.22)",
-    background: "rgba(255,255,255,0.08)",
-    cursor: "pointer",
-    textAlign: "center",
-    userSelect: "none",
-    ...extra,
-  });
-
-  // =========================
-  // VIEW: PAUSE
-  // =========================
-  if (view === "pause") {
-    const roomLinkStyle = {
-      color: "#666",
-      textDecoration: "none",
-      display: "inline-block",
-      padding: "6px 10px",
-      borderRadius: "10px",
+  const T = useMemo(() => {
+    if (theme === "SPACESHIP") {
+      return {
+        pageBg: "#0b1020",
+        cardBg: "#111a33",
+        text: "#e5e7eb",
+        sub: "#9ca3af",
+        border: "rgba(255,255,255,0.12)",
+        btnBg: "#1f2a4d",
+        btnText: "#e5e7eb",
+        accent: "#7dd3fc",
+      };
+    }
+    // NORDIC
+    return {
+      pageBg: "#f7f8fb",
+      cardBg: "#ffffff",
+      text: "#111111",
+      sub: "#6b7280",
+      border: "#e5e7eb",
+      btnBg: "#111827",
+      btnText: "#ffffff",
+      accent: "#2563eb",
     };
+  }, [theme]);
 
+  useEffect(() => {
+    if (!scanning) return;
+    setScanMsg("SCANNING...");
+    const t1 = setTimeout(() => setScanMsg("SCANNING... 50%"), 900);
+    const t2 = setTimeout(() => setScanMsg("SCANNING COMPLETE."), 2000);
+    const t3 = setTimeout(() => setScanning(false), 2000);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [scanning]);
+
+  const shell = {
+    minHeight: "100vh",
+    background: T.pageBg,
+    color: T.text,
+    fontFamily:
+      'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial',
+    padding: 16,
+  };
+
+  const card = {
+    maxWidth: 760,
+    margin: "0 auto",
+    border: `1px solid ${T.border}`,
+    borderRadius: 18,
+    padding: 18,
+    background: T.cardBg,
+    boxShadow:
+      theme === "SPACESHIP"
+        ? "0 10px 30px rgba(0,0,0,0.35)"
+        : "0 10px 30px rgba(17,24,39,0.08)",
+  };
+
+  const topRow = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 14,
+  };
+
+  const pillBtn = {
+    border: `1px solid ${T.border}`,
+    background: "transparent",
+    color: T.text,
+    padding: "8px 12px",
+    borderRadius: 999,
+    fontSize: 13,
+    cursor: "pointer",
+  };
+
+  const primaryBtn = {
+    border: "none",
+    background: T.btnBg,
+    color: T.btnText,
+    padding: "12px 14px",
+    borderRadius: 14,
+    fontSize: 14,
+    cursor: "pointer",
+    width: "100%",
+  };
+
+  const secondaryBtn = {
+    border: `1px solid ${T.border}`,
+    background: "transparent",
+    color: T.text,
+    padding: "12px 14px",
+    borderRadius: 14,
+    fontSize: 14,
+    cursor: "pointer",
+    width: "100%",
+  };
+
+  const linkBtn = {
+    textDecoration: "none",
+    display: "block",
+    textAlign: "center",
+    border: `1px solid ${T.border}`,
+    background: "transparent",
+    color: T.text,
+    padding: "12px 14px",
+    borderRadius: 14,
+    fontSize: 14,
+  };
+
+  function ThemeToggle() {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#f8f9fa",
-          color: "#333",
-          fontFamily: "sans-serif",
-          padding: "20px",
-          textAlign: "center",
-          position: "relative",
-        }}
+      <button
+        style={pillBtn}
+        onClick={() => setTheme((t) => (t === "NORDIC" ? "SPACESHIP" : "NORDIC"))}
+        title="Theme toggle"
       >
-        <button
-          onClick={() => setView("house")}
-          style={{
-            position: "absolute",
-            top: "20px",
-            left: "20px",
-            fontSize: "12px",
-            color: "#bbb",
-            border: "none",
-            background: "none",
-            cursor: "pointer",
-          }}
-        >
-          ← HOUSE
-        </button>
-
-        <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem", fontWeight: 300 }}>
-          PAUSE
-        </h1>
-
-        <p style={{ marginBottom: "2rem", color: "#666" }}>
-          くつろいでいってください。
-        </p>
-
-        <Link href="/board" style={{ ...pillBtn(), marginBottom: "28px", padding: "12px 32px" }}>
-          掲示板の扉をひらく
-        </Link>
-
-        <div style={{ lineHeight: 2.2 }}>
-          <div>
-            <Link href="/rooms/yottemita" style={roomLinkStyle}>
-              よってみた
-            </Link>
-          </div>
-          <div>
-            <Link href="/rooms/poem" style={roomLinkStyle}>
-              ぽえむ（言ってもいいのよ）
-            </Link>
-          </div>
-          <div>
-            <Link href="/rooms/manager" style={roomLinkStyle}>
-              ちょっと一息（管理人さん）
-            </Link>
-          </div>
-        </div>
-      </main>
+        Theme: {theme === "NORDIC" ? "Nordic" : "Spaceship"}
+      </button>
     );
   }
-
-  // =========================
-  // VIEW: STAR LEAF
-  // =========================
-  if (view === "star-leaf") {
-    return (
-      <main
-        style={{
-          minHeight: "100vh",
-          backgroundColor: "#000",
-          color: "#22c55e",
-          fontFamily:
-            "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-          padding: "16px",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "980px",
-            border: "2px solid #22c55e",
-            padding: "32px 20px",
-            minHeight: "86vh",
-            position: "relative",
-          }}
-        >
-          <header style={{ marginBottom: "48px" }}>
-            <h1
-              style={{
-                fontSize: "44px",
-                letterSpacing: "0.45em",
-                fontWeight: 900,
-                color: "#4ade80",
-                margin: 0,
-              }}
-            >
-              STAR LEAF
-            </h1>
-          </header>
-
-          <button
-            onClick={startScan}
-            style={{
-              width: "280px",
-              height: "96px",
-              border: "2px solid #4ade80",
-              background: "transparent",
-              color: "#22c55e",
-              fontSize: "18px",
-              letterSpacing: "0.2em",
-              boxShadow: "0 0 20px rgba(74,222,128,0.45)",
-              cursor: "pointer",
-            }}
-          >
-            {isScanning ? "SEARCHING..." : "SCANNING START"}
-          </button>
-
-          <button
-            onClick={() => setView("house")}
-            style={{
-              marginTop: "28px",
-              fontSize: "12px",
-              color: "#facc15",
-              textDecoration: "underline",
-              fontStyle: "italic",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            ヌールマーケットへ戻る &gt;&gt;
-          </button>
-        </div>
-      </main>
-    );
-  }
-
-  // =========================
-  // VIEW: HOUSE (NURU MARKET)
-  // =========================
-  const houseBg = theme === "nordic" ? "#fff7ed" : "#020617";
-  const frameBorder =
-    theme === "nordic" ? "rgba(251,146,60,0.35)" : "rgba(14,116,144,0.35)";
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        backgroundColor: houseBg,
-        color: theme === "nordic" ? "#1c1917" : "#e2e8f0",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "32px 20px",
-        fontFamily:
-          "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-      }}
-    >
-      <header
-        style={{
-          width: "100%",
-          maxWidth: "720px",
-          textAlign: "center",
-          marginBottom: "18px",
-          paddingBottom: "14px",
-          borderBottom: `1px solid ${theme === "nordic" ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.16)"}`,
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "34px",
-            fontWeight: 900,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            fontStyle: "italic",
-            margin: 0,
-            color: theme === "nordic" ? "#1c1917" : "#fff",
-          }}
-        >
-          NURU MARKET HOUSE
-        </h1>
-
-        <div style={{ marginTop: "10px" }}>
-          <button
-            onClick={toggleTheme}
-            style={{
-              fontSize: "12px",
-              border: `1px solid ${frameBorder}`,
-              background: "transparent",
-              color: theme === "nordic" ? "#7c2d12" : "#7dd3fc",
-              padding: "6px 10px",
-              borderRadius: "999px",
-              cursor: "pointer",
-            }}
-          >
-            THEME: {theme === "nordic" ? "NORDIC" : "SPACESHIP"}
-          </button>
+    <div style={shell}>
+      <div style={card}>
+        {/* 共通ヘッダー */}
+        <div style={topRow}>
+          <div style={{ fontSize: 13, color: T.sub }}>
+            PAUSE / ヌールマーケットPWA
+          </div>
+          <ThemeToggle />
         </div>
-      </header>
 
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "720px",
-          aspectRatio: "16 / 9",
-          borderRadius: "42px",
-          border: `4px solid ${frameBorder}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 18px 60px rgba(0,0,0,0.25)",
-          background: theme === "nordic" ? "rgba(0,0,0,0.02)" : "rgba(255,255,255,0.04)",
-        }}
-      >
-        <div style={{ fontSize: "72px", cursor: "default", transform: "translateY(-2px)" }}>
-          👑
-          <span
-            style={{
-              display: "block",
-              marginTop: "10px",
-              fontSize: "10px",
-              fontWeight: 900,
-              fontStyle: "italic",
-              letterSpacing: "0.18em",
-              textAlign: "center",
-              opacity: 0.9,
-              color: theme === "nordic" ? "#1c1917" : "#fff",
-            }}
-          >
-            Owner Yocchi
-          </span>
-        </div>
-      </div>
+        {/* 画面 */}
+        {view === "HOUSE" && (
+          <div>
+            <div style={{ fontSize: 42, lineHeight: 1, marginBottom: 8 }}>👑</div>
+            <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
+              HOUSE
+            </div>
+            <div style={{ color: T.sub, fontSize: 14, marginBottom: 16 }}>
+              Owner <span style={{ color: T.accent, fontWeight: 700 }}>Yocchi</span>
+            </div>
 
-      <div
-        style={{
-          marginTop: "28px",
-          width: "100%",
-          maxWidth: "520px",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "16px",
-        }}
-      >
-        <button
-          onClick={() => setView("pause")}
-          style={cardBtn({
-            border: `1px solid ${theme === "nordic" ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.22)"}`,
-            background: theme === "nordic" ? "rgba(0,0,0,0.03)" : "rgba(255,255,255,0.08)",
-            color: theme === "nordic" ? "#1c1917" : "#fff",
-          })}
-        >
-          <div style={{ fontSize: "26px", marginBottom: "8px" }}>☕️</div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr",
+                gap: 10,
+                maxWidth: 420,
+              }}
+            >
+              <button style={primaryBtn} onClick={() => setView("PAUSE")}>
+                ☕ Pause
+              </button>
+
+              <button style={secondaryBtn} onClick={() => setView("STAR")}>
+                🌿 STAR LEAF
+              </button>
+
+              {/* ★ 追加：/board 直行導線 */}
+              <Link href="/board" style={linkBtn}>
+                🧾 BOARD（掲示板）
+              </Link>
+            </div>
+
+            <div style={{ marginTop: 16, color: T.sub, fontSize: 12 }}>
+              ※ /board は別ページとして動作（端末内保存）
+            </div>
+          </div>
+        )}
+
+        {view === "PAUSE" && (
+          <div>
+            <button
+              style={pillBtn}
+              onClick={() => setView("HOUSE")}
+              title="Back to HOUSE"
+            >
+              ← HOUSE
+            </button>
+
+            <div style={{ marginTop: 14, fontSize: 20, fontWeight: 700 }}>
+              PAUSE
+            </div>
+            <div style={{ marginTop: 6, color: T.sub, fontSize: 14 }}>
+              くつろいでいってください。
+            </div>
+
+            <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+              <Link href="/board" style={linkBtn}>
+                /board
+              </Link>
+              <Link href="/rooms/yottemita" style={linkBtn}>
+                /rooms/yottemita
+              </Link>
+              <Link href="/rooms/poem" style={linkBtn}>
+                /rooms/poem
+              </Link>
+              <Link href="/rooms/manager" style={linkBtn}>
+                /rooms/manager
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {view === "STAR" && (
           <div
             style={{
-              fontSize: "12px",
-              fontWeight: 800,
-              letterSpacing: "0.18em",
-              fontStyle: "italic",
-              textTransform: "uppercase",
+              background: "#000000",
+              color: "#22c55e",
+              borderRadius: 16,
+              padding: 16,
+              border: `1px solid ${T.border}`,
             }}
           >
-            Pause
-          </div>
-        </button>
+            <button
+              style={{
+                ...pillBtn,
+                border: `1px solid rgba(34,197,94,0.45)`,
+                color: "#22c55e",
+              }}
+              onClick={() => setView("HOUSE")}
+            >
+              ← HOUSE
+            </button>
 
-        <button
-          onClick={() => setView("star-leaf")}
-          style={cardBtn({
-            border: "1px solid rgba(16,185,129,0.35)",
-            background: "rgba(16,185,129,0.10)",
-            color: "#22c55e",
-          })}
-        >
-          <div style={{ fontSize: "26px", marginBottom: "8px" }}>🌿</div>
-          <div style={{ fontSize: "12px", fontWeight: 800, letterSpacing: "0.18em", fontStyle: "italic" }}>
-            STAR LEAF
-          </div>
-        </button>
-      </div>
+            <div style={{ marginTop: 12, fontSize: 18, fontWeight: 800 }}>
+              STAR LEAF
+            </div>
 
-      <div style={{ marginTop: "18px", opacity: 0.65, fontSize: "12px" }}>
-        House → Pause / Star Leaf
+            <button
+              onClick={() => setScanning(true)}
+              disabled={scanning}
+              style={{
+                marginTop: 12,
+                width: "100%",
+                border: "1px solid rgba(34,197,94,0.45)",
+                background: "transparent",
+                color: "#22c55e",
+                padding: "12px 14px",
+                borderRadius: 14,
+                cursor: scanning ? "not-allowed" : "pointer",
+                fontSize: 14,
+              }}
+            >
+              SCANNING START
+            </button>
+
+            <div style={{ marginTop: 10, fontSize: 13, opacity: 0.9 }}>
+              {scanning ? scanMsg : scanMsg || "READY."}
+            </div>
+
+            <div style={{ marginTop: 14 }}>
+              <Link
+                href="/"
+                style={{
+                  display: "inline-block",
+                  color: "#22c55e",
+                  textDecoration: "none",
+                  borderBottom: "1px solid rgba(34,197,94,0.6)",
+                  paddingBottom: 2,
+                }}
+              >
+                ヌールマーケットへ戻る
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
-    </main>
+    </div>
   );
 }
+
