@@ -197,7 +197,8 @@ export default function BoardPage() {
 
         <h1 style={{ marginTop: 18, marginBottom: 6, fontSize: 22 }}>/board</h1>
         <div style={{ marginBottom: 12, color: "#6b7280", fontSize: 13 }}>
-          匿名・端末内保存（localStorage）／固定メモ（📌）は1件だけ
+          匿名・端末内保存（localStorage）／固定メモ（📌）は1件だけ【PIN-V3】
+
         </div>
 
         {/* ハンドル欄 */}
