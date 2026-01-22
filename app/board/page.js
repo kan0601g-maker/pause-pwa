@@ -3,7 +3,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-const STORAGE_KEY = "pause_board_posts_v1";
+const STORAGE_KEY = "pause_board_posts_v2";
+const NAME_KEY = "pause_board_name_v1";
 
 function safeParse(json, fallback) {
   try {
@@ -27,17 +28,39 @@ function formatJST(iso) {
   }
 }
 
+function sanitizeName(s) {
+  const t = (s ?? "").trim().replace(/\s+/g, " ");
+  // 長すぎ事故防止
+  return t.slice(0, 24);
+}
+
 export default function BoardPage() {
   const [mounted, setMounted] = useState(false);
+
+  const [name, setName] = useState("匿名");
   const [posts, setPosts] = useState([]);
   const [text, setText] = useState("");
 
+  // 初回ロード：名前＆投稿を読む
   useEffect(() => {
     setMounted(true);
-    const saved = safeParse(localStorage.getItem(STORAGE_KEY) || "[]", []);
-    if (Array.isArray(saved)) setPosts(saved);
+
+    const savedName = localStorage.getItem(NAME_KEY);
+    if (savedName && typeof savedName === "string") {
+      setName(sanitizeName(savedName) || "匿名");
+    }
+
+    const savedPosts = safeParse(localStorage.getItem(STORAGE_KEY) || "[]", []);
+    if (Array.isArray(savedPosts)) setPosts(savedPosts);
   }, []);
 
+  // 名前を保存
+  useEffect(() => {
+    if (!mounted) return;
+    localStorage.setItem(NAME_KEY, sanitizeName(name) || "匿名");
+  }, [mounted, name]);
+
+  // 投稿を保存
   useEffect(() => {
     if (!mounted) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
@@ -51,9 +74,11 @@ export default function BoardPage() {
 
     const item = {
       id: crypto?.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      name: sanitizeName(name) || "匿名",
       body,
       createdAt: nowISO(),
     };
+
     setPosts((prev) => [item, ...prev]);
     setText("");
   }
@@ -117,13 +142,43 @@ export default function BoardPage() {
           </button>
         </div>
 
-        <h1 style={{ marginTop: 18, marginBottom: 6, fontSize: 22 }}>
-          /board
-        </h1>
-        <div style={{ marginBottom: 16, color: "#6b7280", fontSize: 13 }}>
-          匿名・端末内保存（localStorage）／まずは最小MVP
+        <h1 style={{ marginTop: 18, marginBottom: 6, fontSize: 22 }}>/board</h1>
+        <div style={{ marginBottom: 12, color: "#6b7280", fontSize: 13 }}>
+          匿名・端末内保存（localStorage）／ハンドル固定（端末内）
         </div>
 
+        {/* ハンドル欄 */}
+        <div
+          style={{
+            border: `1px solid ${border}`,
+            borderRadius: 14,
+            padding: 12,
+            background: "#fff",
+            marginBottom: 12,
+          }}
+        >
+          <div style={{ fontSize: 13, color: "#6b7280", marginBottom: 6 }}>
+            ハンドル（この端末に保存）
+          </div>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="例：Owner Yocchi / 匿名"
+            style={{
+              width: "100%",
+              border: `1px solid ${border}`,
+              borderRadius: 12,
+              padding: "10px 12px",
+              fontSize: 15,
+              outline: "none",
+            }}
+          />
+          <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
+            表示名： <b>{sanitizeName(name) || "匿名"}</b>
+          </div>
+        </div>
+
+        {/* 投稿欄 */}
         <div
           style={{
             border: `1px solid ${border}`,
@@ -162,7 +217,7 @@ export default function BoardPage() {
                 cursor: canPost ? "pointer" : "not-allowed",
               }}
             >
-              投稿
+              {sanitizeName(name) || "匿名"} として投稿
             </button>
 
             <button
@@ -187,6 +242,7 @@ export default function BoardPage() {
           </div>
         </div>
 
+        {/* 一覧 */}
         <div style={{ marginTop: 16 }}>
           {posts.length === 0 ? (
             <div
@@ -212,21 +268,27 @@ export default function BoardPage() {
                   marginBottom: 10,
                 }}
               >
-                <div style={{ whiteSpace: "pre-wrap", fontSize: 15, lineHeight: 1.6 }}>
-                  {p.body}
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ fontSize: 13, color: "#111827" }}>
+                    <b>{p.name || "匿名"}</b>
+                  </div>
+                  <div style={{ color: "#6b7280", fontSize: 12 }}>
+                    {formatJST(p.createdAt)}
+                  </div>
                 </div>
 
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
                     marginTop: 10,
-                    gap: 10,
+                    whiteSpace: "pre-wrap",
+                    fontSize: 15,
+                    lineHeight: 1.6,
                   }}
                 >
-                  <div style={{ color: "#6b7280", fontSize: 12 }}>
-                    {formatJST(p.createdAt)}
-                  </div>
+                  {p.body}
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", marginTop: 10 }}>
                   <div style={{ flex: 1 }} />
                   <button
                     onClick={() => removePost(p.id)}
@@ -249,10 +311,9 @@ export default function BoardPage() {
         </div>
 
         <div style={{ marginTop: 24, color: "#6b7280", fontSize: 12 }}>
-          ※この掲示板は端末ごとに保存されます（サーバ送信なし）。
+          ※ハンドルと投稿は端末ごとに保存されます（サーバ送信なし）。
         </div>
       </div>
     </div>
   );
 }
-
