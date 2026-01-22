@@ -1,12 +1,12 @@
-console.log("PAGE_JS_UPDATED_20260123");
-
-// app/page.js
 "use client";
 
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 
 export default function Page() {
+  // ★反映確認用（あとで消してOK）
+  const BUILD_TAG = "BUILD_20260123_STARREEF_BTN_A";
+
   const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARLEAF"
   const [houseTheme, setHouseTheme] = useState("Nordic"); // "Nordic" | "Spaceship"
 
@@ -22,7 +22,7 @@ export default function Page() {
   const audioCtxRef = useRef(null);
   const playingRef = useRef(false);
 
-  const OPENING_MS = 9500; // 8〜12秒の範囲
+  const OPENING_MS = 9500; // 8〜12秒の範囲内
   const SCANNING_MS = 2000;
 
   const clearStarreefTimers = () => {
@@ -80,13 +80,13 @@ export default function Page() {
       const pattern = [
         { f: 440, dt: 0.0, d: 0.28, type: "sawtooth", g: 0.55 },
         { f: 330, dt: 0.32, d: 0.38, type: "sawtooth", g: 0.55 },
-        { f: 392, dt: 0.78, d: 0.26, type: "sawtooth", g: 0.50 },
+        { f: 392, dt: 0.78, d: 0.26, type: "sawtooth", g: 0.5 },
         { f: 110, dt: 0.0, d: 0.55, type: "triangle", g: 0.35 },
         { f: 98, dt: 0.62, d: 0.55, type: "triangle", g: 0.35 },
       ];
 
       const loopLen = 1.2;
-      const loops = Math.ceil((OPENING_MS / 1000) / loopLen);
+      const loops = Math.ceil(OPENING_MS / 1000 / loopLen);
 
       for (let i = 0; i < loops; i++) {
         const baseT = startAt + i * loopLen;
@@ -311,6 +311,9 @@ export default function Page() {
           <div style={{ fontSize: 34, lineHeight: "34px", marginBottom: 6 }}>👑</div>
           <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "0.4px" }}>nuru market</div>
 
+          {/* ★反映確認用（あとで消してOK） */}
+          <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6 }}>{BUILD_TAG}</div>
+
           <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
             <button onClick={() => goScreen("HOUSE")} style={topTabStyle(screen === "HOUSE")}>
               <E>🏠</E> <span>HOUSE</span>
@@ -399,7 +402,7 @@ export default function Page() {
                 <E>🌿</E> <span>STAR REEF</span>
               </div>
 
-              {/* 操作：テロップ開始 / ゲーム開始 */}
+              {/* ★テロップ開始 / ゲーム開始（必ずここに出る） */}
               <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
                 <button onClick={startOpening} style={btn()}>
                   <E>▶</E> <span>テロップ（音楽付き）</span>
@@ -411,8 +414,19 @@ export default function Page() {
                 </Link>
               </div>
 
+              {/* opening：黄テロップ */}
               {starreefPhase === "opening" && (
-                <div style={{ marginTop: 12, borderRadius: 16, border: "1px solid rgba(154, 245, 154, 0.18)", background: "rgba(0,0,0,0.45)", overflow: "hidden", position: "relative", height: 220 }}>
+                <div
+                  style={{
+                    marginTop: 12,
+                    borderRadius: 16,
+                    border: "1px solid rgba(154, 245, 154, 0.18)",
+                    background: "rgba(0,0,0,0.45)",
+                    overflow: "hidden",
+                    position: "relative",
+                    height: 220,
+                  }}
+                >
                   <div
                     key={crawlKey}
                     style={{
@@ -441,12 +455,29 @@ export default function Page() {
                     </div>
                   </div>
 
-                  <button onClick={skipToScanning} style={{ position: "absolute", top: 10, right: 10, padding: "8px 10px", borderRadius: 12, border: "1px solid rgba(154, 245, 154, 0.22)", background: "rgba(154, 245, 154, 0.08)", color: "#9AF59A", cursor: "pointer", fontWeight: 700, lineHeight: 1, boxSizing: "border-box" }}>
+                  <button
+                    onClick={skipToScanning}
+                    style={{
+                      position: "absolute",
+                      top: 10,
+                      right: 10,
+                      padding: "8px 10px",
+                      borderRadius: 12,
+                      border: "1px solid rgba(154, 245, 154, 0.22)",
+                      background: "rgba(154, 245, 154, 0.08)",
+                      color: "#9AF59A",
+                      cursor: "pointer",
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      boxSizing: "border-box",
+                    }}
+                  >
                     SKIP
                   </button>
                 </div>
               )}
 
+              {/* scanning / ready 表示 */}
               <div style={{ marginTop: 12, fontSize: 13, lineHeight: 1.7 }}>
                 {starreefPhase === "scanning" ? (
                   <div style={{ opacity: 0.92 }}>
@@ -485,4 +516,5 @@ export default function Page() {
     </main>
   );
 }
+
 
