@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from "next/link";
 
 export default function NuruMarketMaster() {
-  // ここで "house" を指定しているから、最初は必ず王冠が出るわ！
+  // 最初に表示する画面（"house" = 王冠画面）
   const [view, setView] = useState("house"); 
   const [theme, setTheme] = useState("spaceship");
   const [isScanning, setIsScanning] = useState(false);
@@ -14,13 +14,13 @@ export default function NuruMarketMaster() {
   };
 
   // ------------------------------------------
-  // 【画面1】PAUSE（オーナーこだわりのエントランス）
+  // 【画面1】PAUSE（オーナーのこだわりエントランス）
   // ------------------------------------------
   if (view === "pause") {
     const roomLinkStyle = { color: "#666", textDecoration: "none", display: "inline-block", padding: "6px 10px", borderRadius: "10px" };
     return (
       <main style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#f8f9fa", color: "#333", fontFamily: "sans-serif", padding: "20px", textAlign: "center" }}>
-        <button onClick={() => setView("house")} style={{ position: 'absolute', top: '20px', left: '20px', fontSize: '12px', color: '#ccc', border: 'none', background: 'none', cursor: 'pointer' }}>← HOUSE</button>
+        <button onClick={() => setView("house")} style={{ position: 'absolute', top: '20px', left: '20px', fontSize: '12px', color: '#ccc', border: 'none', background: 'none', cursor: 'pointer' }}>← NURU HOUSE</button>
         <h1 style={{ fontSize: "2.5rem", marginBottom: "0.5rem", fontWeight: 300 }}>PAUSE</h1>
         <p style={{ marginBottom: "2rem", color: "#666" }}>くつろいでいってください。</p>
         <Link href="/board" style={{ display: "inline-block", padding: "12px 32px", backgroundColor: "#fff", color: "#555", textDecoration: "none", borderRadius: "30px", border: "1px solid #ddd", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", marginBottom: "28px" }}>掲示板の扉をひらく</Link>
@@ -41,22 +41,27 @@ export default function NuruMarketMaster() {
       <main className="min-h-screen bg-black text-green-500 font-mono p-4 flex flex-col items-center border-[12px] border-black">
         <div className="w-full max-w-4xl border-2 border-green-500 p-8 flex flex-col items-center min-h-[90vh] relative">
           <header className="text-center mb-12"><h1 className="text-5xl font-black tracking-[0.5em] text-green-400">STAR LEAF</h1></header>
-          <button onClick={startScan} className="w-64 h-24 border-2 border-green-400 text-xl shadow-[0_0_20px_rgba(74,222,128,0.5)]">
+          <button onClick={startScan} className="w-64 h-24 border-2 border-green-400 text-xl shadow-[0_0_20px_rgba(74,222,128,0.5)] active:bg-green-500/20">
             {isScanning ? "SEARCHING..." : "SCANNING START"}
           </button>
-          <button onClick={() => setView("house")} className="mt-auto text-xs text-yellow-400 underline italic">ヌールマーケットで官給品を調達する >></button>
+          <div className="mt-auto w-full border-2 border-green-500 p-4 text-center">
+            <p className="text-[10px] tracking-widest uppercase">Current Threat: Sugi-Vader Level 5</p>
+          </div>
+          <button onClick={() => setView("house")} className="mt-8 text-xs text-yellow-400 underline italic">
+            ヌールマーケットで官給品を調達する >>
+          </button>
         </div>
       </main>
     );
   }
 
   // ------------------------------------------
-  // 【画面3】NURU MARKET HOUSE（ここが王冠画面！）
+  // 【画面3】NURU MARKET HOUSE（王冠画面）
   // ------------------------------------------
   const themeStyles = theme === "nordic" ? "bg-orange-50 text-stone-800 border-orange-200" : "bg-slate-950 text-cyan-400 border-cyan-900";
 
   return (
-    <main className={`min-h-screen ${themeStyles.split(' ')[0]} flex flex-col items-center p-8 font-mono`}>
+    <main className={`min-h-screen transition-all duration-700 ${themeStyles.split(' ')[0]} flex flex-col items-center p-8 font-mono`}>
       <header className="text-center mb-6 w-full max-w-2xl border-b pb-4 border-opacity-20">
         <h1 className="text-4xl font-black tracking-widest uppercase italic">NURU MARKET HOUSE</h1>
         <div className="flex gap-4 justify-center mt-4 text-[10px]">
