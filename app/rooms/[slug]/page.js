@@ -9,241 +9,116 @@ export default function RoomSlugPage() {
   const slug = (params?.slug || "").toString();
 
   const isPoem = slug === "poem";
+  const isManager = slug === "manager";
+  const isYottemita = slug === "yottemita";
 
   // ========== 共通（宇宙船テーマ） ==========
-  const bg = "#05070f";
+  const bg = "#020617";
   const card = "#0b1020";
-  const border = "rgba(125,211,252,0.35)";
+  const border = "rgba(34,211,238,0.3)";
   const text = "#e5e7eb";
   const sub = "#9ca3af";
 
-  const shell = {
+  const shellStyle = {
     minHeight: "100vh",
-    background: bg,
-    color: text,
-    fontFamily:
-      'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial',
-    padding: 24,
+    background: isPoem ? "#ffffff" : bg,
+    color: isPoem ? "#111111" : text,
+    fontFamily: 'ui-sans-serif, system-ui, -apple-system, sans-serif',
+    padding: "40px 20px",
+    transition: "all 0.5s ease",
   };
 
-  const frame = {
-    maxWidth: 920,
+  const frameStyle = {
+    maxWidth: 800,
     margin: "0 auto",
-    borderRadius: 28,
-    border: `2px solid ${border}`,
-    background: card,
-    padding: 32,
+    borderRadius: 32,
+    border: isPoem ? "1px solid #eee" : `1px solid ${border}`,
+    background: isPoem ? "#fff" : card,
+    padding: "40px",
     textAlign: "center",
+    boxShadow: isPoem ? "0 10px 40px rgba(0,0,0,0.02)" : "0 0 40px rgba(0,0,0,0.2)",
   };
 
-  const btn = {
-    padding: "14px 18px",
-    borderRadius: 18,
+  const btnStyle = (type) => ({
+    padding: "14px 24px",
+    borderRadius: 999,
     fontSize: 14,
     cursor: "pointer",
-    border: `1px solid ${border}`,
-    background: "rgba(255,255,255,0.04)",
-    color: text,
+    border: isPoem ? "1px solid #e5e7eb" : `1px solid ${border}`,
+    background: isPoem ? "#fff" : "rgba(34,211,238,0.05)",
+    color: isPoem ? "#111" : text,
     textDecoration: "none",
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-  };
+    transition: "all 0.3s ease",
+    width: "100%",
+    maxWidth: 300,
+  });
 
-  // ========== poem（白テーマ） ==========
-  const poemShell = {
-    minHeight: "100vh",
-    background: "#ffffff",
-    color: "#111111",
-    fontFamily:
-      'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial',
-    padding: 24,
-  };
-
-  const poemWrap = {
-    maxWidth: 860,
-    margin: "0 auto",
-    padding: "24px 18px",
-  };
-
-  const poemCard = {
-    border: "1px solid #e5e7eb",
-    borderRadius: 12,
-    padding: 18,
-    background: "#ffffff",
-    textAlign: "left",
-  };
-
-  const poemBtn = {
-    border: "1px solid #e5e7eb",
-    borderRadius: 999,
-    padding: "10px 16px",
-    background: "#ffffff",
-    color: "#111111",
-    textDecoration: "none",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    fontSize: 14,
-  };
-
-  // poem専用文言
-  const poemLead = useMemo(
-    () => [
-      "意味にならなくても、言っていい。",
-      "正しさじゃなくて、ことばのかけらを。",
-      "ここは、静かな言葉の部屋です。",
-    ],
-    []
-  );
-
-  // ========== poemページ ==========
-  if (isPoem) {
-    return (
-      <div style={poemShell}>
-        <div style={poemWrap}>
-          <div style={{ textAlign: "left", marginTop: 12 }}>
-            <div style={{ fontSize: 32, fontWeight: 700 }}>
-              ぽえむ（言ってもいいのよ）
-            </div>
-
-            <div style={{ marginTop: 14, lineHeight: 1.9, color: "#374151" }}>
-              {poemLead.map((t, i) => (
-                <div key={i}>{t}</div>
-              ))}
-            </div>
-
-            <div style={{ marginTop: 22, ...poemCard }}>
-              <div style={{ fontWeight: 700, marginBottom: 10 }}>準備中</div>
-              <div style={{ color: "#374151" }}>
-                いまは、部屋の空気を整えています。
-              </div>
-              <div style={{ marginTop: 8, color: "#374151" }}>
-                言葉が出ない日でも、大丈夫です。
-              </div>
-            </div>
-
-            {/* ★ 追加：何も起きない入力欄（保存も送信も無し） */}
-            <div style={{ marginTop: 18, ...poemCard }}>
-              <div style={{ fontWeight: 700, marginBottom: 10 }}>
-                そっと置いていい場所
-              </div>
-              <div style={{ color: "#6b7280", fontSize: 13, lineHeight: 1.7 }}>
-                ここに書いたものは、保存も送信もしません。<br />
-                ただ置いて、閉じていい。
-              </div>
-
-              <textarea
-                placeholder="（ここに、ことばのかけらを）"
-                rows={6}
-                style={{
-                  marginTop: 12,
-                  width: "100%",
-                  padding: 12,
-                  borderRadius: 10,
-                  border: "1px solid #e5e7eb",
-                  outline: "none",
-                  fontSize: 14,
-                  lineHeight: 1.7,
-                  resize: "vertical",
-                }}
-              />
-            </div>
-
-            <div style={{ marginTop: 18 }}>
-              <Link href="/?view=PAUSE" style={poemBtn}>
-                入口へ戻る
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ========== その他rooms（テンプレ） ==========
-  const allowed = new Set(["yottemita", "poem", "manager"]);
-  const known = allowed.has(slug);
-
-  const iconMap = { yottemita: "🧱", manager: "🧑‍✈️" };
-  const titleMap = { yottemita: "YOTTE MITA", manager: "MANAGER" };
-
-  const lead = known
-    ? "準備中（テンプレ表示）"
-    : "この部屋はまだ登録されていません（テンプレ表示）";
-
-  const cardTitle = known ? "準備中" : "未登録";
-  const cardBody = known
-    ? ["いまは、部屋を準備しています。"]
-    : ["このslugはまだ登録されていません。"];
+  // ========== コンテンツ生成 ==========
+  const roomData = useMemo(() => {
+    if (isPoem) return {
+      title: "ぽえむ（言ってもいいのよ）",
+      lead: ["意味にならなくても、言っていい。", "正しさじゃなくて、ことばのかけらを。", "ここは、静かな言葉の部屋です。"],
+      cardTitle: "準備中",
+      cardBody: "いまは、部屋の空気を整えています。言葉が出ない日でも、大丈夫です。"
+    };
+    if (isManager) return {
+      title: "MANAGER'S DECK",
+      icon: "🧑‍✈️",
+      lead: ["ヌールマーケットの深淵へようこそ。", "ここはオーナーの視点が集まる場所。", "少しだけ、肩の荷を置いていってください。"],
+      cardTitle: "管理人の手記",
+      cardBody: "マーケットの運営状況は良好です。宇宙船のエンジン音を聞きながら、次の作戦を練っています。"
+    };
+    if (isYottemita) return {
+      title: "YOTTE MITA",
+      icon: "🧱",
+      lead: ["ふらっと立ち寄る、レンガの温もり。", "何があるわけじゃないけれど、", "ここに居るだけでいい場所です。"],
+      cardTitle: "部屋の様子",
+      cardBody: "壁のレンガを一つずつ積み上げています。まだ隙間風が入るけれど、それもまた一興。"
+    };
+    return { title: "UNKNOWN ROOM", icon: "🚪", lead: ["未知の空間です。"], cardTitle: "404", cardBody: "この部屋はまだ実体化していません。" };
+  }, [isPoem, isManager, isYottemita]);
 
   return (
-    <div style={shell}>
-      <div style={{ textAlign: "center", marginBottom: 18 }}>
-        <div style={{ fontSize: 22, letterSpacing: 4, fontWeight: 700 }}>
-          ROOM
-        </div>
-        <div style={{ fontSize: 12, color: sub, marginTop: 6 }}>
-          THEME : SPACESHIP
-        </div>
-      </div>
+    <div style={shellStyle}>
+      <div style={frameStyle}>
+        {!isPoem && <div style={{ fontSize: 12, color: "#22d3ee", letterSpacing: 4, marginBottom: 16 }}>ROOM : {slug.toUpperCase()}</div>}
+        
+        <h1 style={{ fontSize: isPoem ? 32 : 40, fontWeight: 700, marginBottom: 20 }}>
+          {isPoem ? "" : roomData.icon} {roomData.title}
+        </h1>
 
-      <div style={frame}>
-        <div style={{ fontSize: 12, color: sub }}>ROOM SLUG</div>
-
-        <div style={{ marginTop: 8, fontSize: 26, fontWeight: 700 }}>
-          {known
-            ? `${iconMap[slug] || "🚪"} ${titleMap[slug] || slug}`
-            : `🚪 ${slug || "(empty)"}`}
+        <div style={{ marginBottom: 32, lineHeight: 2, opacity: 0.8 }}>
+          {roomData.lead.map((t, i) => <div key={i}>{t}</div>)}
         </div>
 
-        <div style={{ marginTop: 10, color: sub, fontSize: 13 }}>{lead}</div>
-
-        <div
-          style={{
-            marginTop: 18,
-            border: `1px solid ${border}`,
-            borderRadius: 16,
-            padding: 16,
-          }}
-        >
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>{cardTitle}</div>
-          {cardBody.map((t, i) => (
-            <div
-              key={i}
-              style={{ marginTop: i ? 6 : 0, color: sub, fontSize: 13 }}
-            >
-              {t}
-            </div>
-          ))}
+        <div style={{ marginBottom: 32, padding: 24, borderRadius: 20, background: isPoem ? "#f9fafb" : "rgba(0,0,0,0.2)", border: isPoem ? "none" : `1px solid ${border}`, textAlign: "left" }}>
+          <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 16 }}>{roomData.cardTitle}</div>
+          <div style={{ fontSize: 14, opacity: 0.7 }}>{roomData.cardBody}</div>
         </div>
 
-        <div
-          style={{
-            marginTop: 22,
-            display: "grid",
-            gap: 12,
-            justifyItems: "center",
-          }}
-        >
-          <Link href="/?view=PAUSE" style={{ ...btn, width: "min(420px, 100%)" }}>
-            ← PAUSE に戻る
-          </Link>
+        {isPoem && (
+          <div style={{ marginBottom: 32, textAlign: "left" }}>
+            <div style={{ fontWeight: 700, marginBottom: 12 }}>そっと置いていい場所</div>
+            <textarea
+              placeholder="（ここに、ことばのかけらを）"
+              rows={6}
+              style={{ width: "100%", padding: 20, borderRadius: 16, border: "1px solid #e5e7eb", outline: "none", fontSize: 15, lineHeight: 1.8, resize: "none" }}
+            />
+            <div style={{ marginTop: 12, color: "#9ca3af", fontSize: 12 }}>※ここに書いたものは、保存も送信もしません。ただ置いて、閉じていい。</div>
+          </div>
+        )}
 
-          <Link href="/board" style={{ ...btn, width: "min(420px, 100%)" }}>
-            🧾 BOARD（ひとこと）
-          </Link>
-
-          <Link href="/" style={{ ...btn, width: "min(420px, 100%)" }}>
-            ← HOUSE
-          </Link>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
+          <Link href="/?view=PAUSE" style={btnStyle()}>← PAUSE に戻る</Link>
+          <Link href="/board" style={btnStyle()}>🧾 BOARD（ひとこと）</Link>
+          <Link href="/" style={btnStyle()}>🏠 HOUSE（王冠）</Link>
         </div>
 
-        <div style={{ marginTop: 16, color: sub, fontSize: 12 }}>
-          ※ poem は白テーマ／他は宇宙船テーマ（段階的に育てる）
-        </div>
+        {!isPoem && <div style={{ marginTop: 32, fontSize: 10, color: sub }}>STATUS : {isManager ? "OWNER AUTHORIZED" : "STABLE"}</div>}
       </div>
     </div>
   );
