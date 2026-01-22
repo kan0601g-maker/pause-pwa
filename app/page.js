@@ -8,25 +8,36 @@ export default function Page() {
   const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARLEAF"
   const [houseTheme, setHouseTheme] = useState("Nordic"); // "Nordic" | "Spaceship"
 
-  // STAR REEF 演出フェーズ
-  // opening(黄テロップ) -> scanning(2秒) -> ready
+  // STAR REEF: opening -> scanning -> ready
   const [starreefPhase, setStarreefPhase] = useState("idle"); // "idle" | "opening" | "scanning" | "ready"
-  const [skipKey, setSkipKey] = useState(0); // アニメ再スタート用
+  const [crawlKey, setCrawlKey] = useState(0); // opening再入場でアニメ再起動
+  const [timersSeed, setTimersSeed] = useState(0); // 再入場で確実にタイマー更新
+
+  // オープニングの長さ（8〜12秒の範囲で調整）
+  const OPENING_MS = 9500; // 9.5秒
+  const SCANNING_MS = 2000; // 2秒
 
   useEffect(() => {
     if (screen !== "STARLEAF") return;
 
+    // 入った瞬間に必ず opening から開始
     setStarreefPhase("opening");
-    setSkipKey((v) => v + 1);
+    setCrawlKey((v) => v + 1);
+    setTimersSeed((v) => v + 1);
 
-    const t1 = setTimeout(() => setStarreefPhase("scanning"), 9500); // 黄テロップ時間
-    const t2 = setTimeout(() => setStarreefPhase("ready"), 11500); // scanning 2秒
+    const t1 = setTimeout(() => {
+      setStarreefPhase("scanning");
+    }, OPENING_MS);
+
+    const t2 = setTimeout(() => {
+      setStarreefPhase("ready");
+    }, OPENING_MS + SCANNING_MS);
 
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [screen]);
+  }, [screen, timersSeed]);
 
   const theme = useMemo(() => {
     if (screen !== "HOUSE") return "plain";
@@ -52,7 +63,7 @@ export default function Page() {
         color: "#0f172a",
       };
     }
-    // Spaceship
+    // Spaceship（暗→明るめ）
     return {
       background:
         "radial-gradient(1200px 600px at 20% 10%, rgba(140,180,255,0.25) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, #0b1020 0%, #0a0f1a 55%, #0d1424 100%)",
@@ -80,6 +91,7 @@ export default function Page() {
         boxShadow: "0 8px 30px rgba(0, 0, 0, 0.35)",
       };
     }
+    // HOUSE
     return {
       border:
         theme === "Nordic"
@@ -97,6 +109,7 @@ export default function Page() {
     };
   })();
 
+  // 絵文字を固定幅で揃える
   const E = ({ children }) => (
     <span
       style={{
@@ -166,6 +179,7 @@ export default function Page() {
       };
     }
 
+    // HOUSE
     if (variant === "ghost") {
       return {
         ...common,
@@ -176,12 +190,11 @@ export default function Page() {
         color: isNordic ? "#0f172a" : "#e6eefc",
       };
     }
+
     return {
       ...common,
       background: isNordic ? "#0f172a" : "rgba(230, 238, 252, 0.10)",
-      border: isNordic
-        ? "1px solid #0f172a"
-        : "1px solid rgba(230, 238, 252, 0.18)",
+      border: isNordic ? "1px solid #0f172a" : "1px solid rgba(230, 238, 252, 0.18)",
       color: isNordic ? "#ffffff" : "#e6eefc",
     };
   };
@@ -220,7 +233,8 @@ export default function Page() {
     boxSizing: "border-box",
   });
 
-  const openingText = [
+  // 黄テロップ本文（ここは後で差し替えOK）
+  const openingLines = [
     "遠い昔、",
     "遥か彼方の山奥で――",
     "",
@@ -237,13 +251,13 @@ export default function Page() {
 
   return (
     <main style={{ ...base, ...bg }}>
-      {/* STAR REEF 用：黄テロップアニメの keyframes */}
+      {/* STAR REEF: 黄テロップ用 keyframes（CSSアニメ） */}
       <style>{`
         @keyframes crawlUp {
-          0% { transform: translateY(62%); opacity: 0; }
-          6% { opacity: 1; }
-          92% { opacity: 1; }
-          100% { transform: translateY(-110%); opacity: 0; }
+          0%   { transform: translateY(62%); opacity: 0; }
+          6%   { opacity: 1; }
+          92%  { opacity: 1; }
+          100% { transform: translateY(-118%); opacity: 0; }
         }
       `}</style>
 
@@ -282,7 +296,7 @@ export default function Page() {
             borderRadius: 18,
             padding: 16,
             boxSizing: "border-box",
-            overflow: "hidden",
+            overflow: "hidden", // 角丸はみ出し防止
           }}
         >
           {screen === "HOUSE" && (
@@ -369,7 +383,7 @@ export default function Page() {
                 <E>🌿</E> <span>STAR REEF</span>
               </div>
 
-              {/* 黄テロップ（opening中だけ表示） */}
+              {/* opening：黄テロップ */}
               {starreefPhase === "opening" && (
                 <div
                   style={{
@@ -383,7 +397,7 @@ export default function Page() {
                   }}
                 >
                   <div
-                    key={skipKey}
+                    key={crawlKey}
                     style={{
                       position: "absolute",
                       left: 16,
@@ -394,22 +408,23 @@ export default function Page() {
                       letterSpacing: "0.6px",
                       lineHeight: 1.55,
                       textAlign: "center",
-                      transformOrigin: "50% 100%",
-                      animation: "crawlUp 9.5s linear forwards",
+                      animation: `crawlUp ${OPENING_MS}ms linear forwards`,
                       textShadow: "0 2px 12px rgba(0,0,0,0.55)",
+                      willChange: "transform",
                     }}
                   >
                     <div style={{ fontSize: 13, opacity: 0.95 }}>STAR REEF</div>
                     <div style={{ fontSize: 16, marginTop: 4 }}>EPISODE</div>
-                    <div style={{ fontSize: 18, marginTop: 4 }}>―― NEW BREATH ――</div>
+                    <div style={{ fontSize: 18, marginTop: 4 }}>— NEW BREATH —</div>
 
                     <div style={{ marginTop: 14, fontSize: 14, opacity: 0.98 }}>
-                      {openingText.map((line, i) => (
-                        <div key={i}>{line || <span>&nbsp;</span>}</div>
+                      {openingLines.map((line, i) => (
+                        <div key={i}>{line === "" ? <span>&nbsp;</span> : line}</div>
                       ))}
                     </div>
                   </div>
 
+                  {/* スキップ */}
                   <button
                     onClick={() => setStarreefPhase("scanning")}
                     style={{
@@ -424,6 +439,7 @@ export default function Page() {
                       cursor: "pointer",
                       fontWeight: 700,
                       lineHeight: 1,
+                      boxSizing: "border-box",
                     }}
                   >
                     SKIP
@@ -431,7 +447,7 @@ export default function Page() {
                 </div>
               )}
 
-              {/* 緑演出（scanning/ready） */}
+              {/* scanning / ready */}
               <div style={{ marginTop: 12, fontSize: 13, lineHeight: 1.7 }}>
                 {starreefPhase === "scanning" ? (
                   <div style={{ opacity: 0.92 }}>
@@ -448,15 +464,18 @@ export default function Page() {
                 )}
               </div>
 
-              <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-                <Link href="/rooms/starleaf" style={btn()}>
-                  <E>🗣️</E> <span>STAR REEF を語る部屋へ</span>
-                </Link>
+              {/* ready前は導線を出さない（儀式の間は邪魔しない） */}
+              {starreefPhase === "ready" && (
+                <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+                  <Link href="/rooms/starleaf" style={btn()}>
+                    <E>🗣️</E> <span>STAR REEF を語る部屋へ</span>
+                  </Link>
 
-                <button onClick={() => setScreen("HOUSE")} style={btn("ghost")}>
-                  ヌールマーケット（HOUSE）へ戻る
-                </button>
-              </div>
+                  <button onClick={() => setScreen("HOUSE")} style={btn("ghost")}>
+                    ヌールマーケット（HOUSE）へ戻る
+                  </button>
+                </div>
+              )}
 
               <div style={{ marginTop: 14, fontSize: 12, opacity: 0.72 }}>
                 ※ 雑談は /rooms/echo、世界観は /rooms/starleaf
