@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 
 export default function Page() {
-  const BUILD_TAG = "BUILD_20260123_LEAF_SUCCESS";
+  const BUILD_TAG = "BUILD_20260123_URL_SYNC_SUCCESS";
 
   const [screen, setScreen] = useState("HOUSE");
   const [houseTheme, setHouseTheme] = useState("Nordic");
@@ -19,7 +19,14 @@ export default function Page() {
   const OPENING_MS = 9500;
   const SCANNING_MS = 2000;
 
-  const openingLines = ["遠い昔、", "遥か彼方の山奥で――", "", "スギ帝国は春の空を黄色く染め、", "花粉デス・クラウドを制圧していた。", "", "だが、呼吸を取り戻す者たちがいる。", "広葉樹同盟軍。", "", "これは健やかな呼吸を取り戻すための、", "ささやかで確かな反撃の記録である。"];
+  // ★リロード対策：URLから画面を復元する魔法
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get("view");
+    if (view === "STARLEAF" || view === "PAUSE") {
+      setScreen(view);
+    }
+  }, []);
 
   const clearTimers = () => {
     if (tOpenRef.current) clearTimeout(tOpenRef.current);
@@ -79,8 +86,13 @@ export default function Page() {
     tReadyRef.current = setTimeout(() => { setStarleafPhase("ready"); stopTheme(); }, OPENING_MS + SCANNING_MS);
   };
 
+  // ★画面切り替え時にURLも書き換える
   const goScreen = (next) => {
-    clearTimers(); stopTheme(); setStarleafPhase("idle"); setScreen(next);
+    clearTimers(); stopTheme(); setStarleafPhase("idle");
+    setScreen(next);
+    // URLを書き換える（ページはリロードされない）
+    const url = next === "HOUSE" ? "/" : `/?view=${next}`;
+    window.history.pushState({}, "", url);
   };
 
   const themeStyle = useMemo(() => {
