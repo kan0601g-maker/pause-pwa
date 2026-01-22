@@ -1,8 +1,4 @@
-export const metadata = {
-  title: "pause-pwa",
-  description: "pause-pwa",
-};
-
+// app/layout.js
 export default function RootLayout({ children }) {
   return (
     <html lang="ja">
