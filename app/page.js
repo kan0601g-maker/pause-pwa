@@ -120,6 +120,7 @@ export default function Page() {
       cursor: "pointer",
       userSelect: "none",
       lineHeight: 1,
+      boxSizing: "border-box", // ★追加
       transition: "transform 0.06s ease, opacity 0.12s ease",
     };
 
@@ -178,7 +179,7 @@ export default function Page() {
     };
   };
 
-  // 上部タブ用（ズレ対策込み）
+  // 上部タブ用
   const topTabStyle = (active) => ({
     display: "inline-flex",
     alignItems: "center",
@@ -193,9 +194,10 @@ export default function Page() {
     fontWeight: 650,
     lineHeight: 1,
     whiteSpace: "nowrap",
+    boxSizing: "border-box", // ★追加
   });
 
-  // HOUSE内テーマ切替（縦ズレ対策込み）
+  // HOUSE内テーマ切替
   const themeBtnStyle = (active) => ({
     display: "inline-flex",
     alignItems: "center",
@@ -210,6 +212,7 @@ export default function Page() {
     fontWeight: 650,
     lineHeight: 1,
     whiteSpace: "nowrap",
+    boxSizing: "border-box", // ★追加
   });
 
   return (
@@ -249,6 +252,7 @@ export default function Page() {
             borderRadius: 18,
             padding: 16,
             boxSizing: "border-box",
+            overflow: "hidden", // ★これが本命（角丸からはみ出すのを防ぐ）
           }}
         >
           {screen === "HOUSE" && (
@@ -378,3 +382,4 @@ export default function Page() {
     </main>
   );
 }
+
