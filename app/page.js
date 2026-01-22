@@ -4,27 +4,40 @@ import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 
 export default function Page() {
-  // ★反映確認用（あとで消してOK）
-  const BUILD_TAG = "BUILD_20260123_STARLEAF_FIX_1";
+  const BUILD_TAG = "BUILD_20260123_STARLEAF_WORKING_01";
 
-  // 画面キーはここで統一：HOUSE / PAUSE / STARLEAF
-  const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARLEAF"
-  const [houseTheme, setHouseTheme] = useState("Nordic"); // "Nordic" | "Spaceship"
+  // 画面キー：HOUSE / PAUSE / STARLEAF
+  const [screen, setScreen] = useState("HOUSE");
+  const [houseTheme, setHouseTheme] = useState("Nordic");
 
-  // STAR LEAF: idle -> opening -> scanning -> ready
+  // STAR LEAF 演出：idle -> opening -> scanning -> ready
   const [starleafPhase, setStarleafPhase] = useState("idle");
   const [crawlKey, setCrawlKey] = useState(0);
 
-  // タイマー管理
   const tOpenRef = useRef(null);
   const tReadyRef = useRef(null);
 
-  // 音（WebAudio）管理
+  // 音（WebAudio）
   const audioCtxRef = useRef(null);
   const playingRef = useRef(false);
 
-  const OPENING_MS = 9500; // 8〜12秒くらい
+  const OPENING_MS = 9500;
   const SCANNING_MS = 2000;
+
+  const openingLines = [
+    "遠い昔、",
+    "遥か彼方の山奥で――",
+    "",
+    "スギ帝国は春の空を黄色く染め、",
+    "花粉デス・クラウドで人々の鼻と目を制圧していた。",
+    "",
+    "だが、呼吸を取り戻す者たちがいる。",
+    "広葉樹同盟軍。",
+    "",
+    "これは花粉症対策ではない。",
+    "健やかな呼吸を取り戻すための、",
+    "ささやかで確かな反撃の記録である。",
+  ];
 
   const clearStarleafTimers = () => {
     if (tOpenRef.current) {
@@ -45,7 +58,6 @@ export default function Page() {
     } catch {}
   };
 
-  // かんたんBGM（ボタン押下で再生＝自動再生規制回避）
   const playTheme = () => {
     try {
       if (playingRef.current) return;
@@ -58,7 +70,7 @@ export default function Page() {
       playingRef.current = true;
 
       const master = ctx.createGain();
-      master.gain.value = 0.06; // 小さめ
+      master.gain.value = 0.06;
       master.connect(ctx.destination);
 
       const startAt = ctx.currentTime + 0.02;
@@ -77,7 +89,6 @@ export default function Page() {
         o.stop(t + dur + 0.02);
       };
 
-      // それっぽいループ（約1.2秒）
       const pattern = [
         { f: 440, dt: 0.0, d: 0.28, type: "sawtooth", g: 0.55 },
         { f: 330, dt: 0.32, d: 0.38, type: "sawtooth", g: 0.55 },
@@ -98,13 +109,10 @@ export default function Page() {
     } catch {}
   };
 
-  // ▶ テロップ開始（音楽付き）
   const startOpening = () => {
     clearStarleafTimers();
-
     setStarleafPhase("opening");
     setCrawlKey((v) => v + 1);
-
     playTheme();
 
     tOpenRef.current = setTimeout(() => setStarleafPhase("scanning"), OPENING_MS);
@@ -114,7 +122,6 @@ export default function Page() {
     }, OPENING_MS + SCANNING_MS);
   };
 
-  // スキップ：scanningへ
   const skipToScanning = () => {
     clearStarleafTimers();
     stopTheme();
@@ -122,198 +129,8 @@ export default function Page() {
     tReadyRef.current = setTimeout(() => setStarleafPhase("ready"), SCANNING_MS);
   };
 
-  const theme = useMemo(() => {
-    if (screen !== "HOUSE") return "plain";
-    return houseTheme;
-  }, [screen, houseTheme]);
-
-  const base = {
-    minHeight: "100dvh",
-    padding: 18,
-    boxSizing: "border-box",
-    fontFamily:
-      'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"',
-  };
-
-  const bg = (() => {
-    if (screen === "PAUSE") return { background: "#ffffff", color: "#111827" };
-    if (screen === "STARLEAF") return { background: "#050807", color: "#9AF59A" };
-
-    if (theme === "Nordic") {
-      return {
-        background: "linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)",
-        color: "#0f172a",
-      };
-    }
-    return {
-      background:
-        "radial-gradient(1200px 600px at 20% 10%, rgba(140,180,255,0.25) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, #0b1020 0%, #0a0f1a 55%, #0d1424 100%)",
-      color: "#e6eefc",
-    };
-  })();
-
-  const card = { maxWidth: 560, margin: "0 auto" };
-
-  const panel = (() => {
-    if (screen === "PAUSE") {
-      return {
-        border: "1px solid rgba(17, 24, 39, 0.10)",
-        background: "#ffffff",
-        boxShadow: "0 8px 30px rgba(2, 6, 23, 0.08)",
-      };
-    }
-    if (screen === "STARLEAF") {
-      return {
-        border: "1px solid rgba(154, 245, 154, 0.18)",
-        background: "rgba(10, 20, 16, 0.55)",
-        boxShadow: "0 8px 30px rgba(0, 0, 0, 0.35)",
-      };
-    }
-    return {
-      border:
-        theme === "Nordic"
-          ? "1px solid rgba(2, 6, 23, 0.10)"
-          : "1px solid rgba(230, 238, 252, 0.12)",
-      background:
-        theme === "Nordic"
-          ? "rgba(255,255,255,0.78)"
-          : "rgba(12, 18, 36, 0.62)",
-      boxShadow:
-        theme === "Nordic"
-          ? "0 10px 30px rgba(2, 6, 23, 0.10)"
-          : "0 10px 40px rgba(0,0,0,0.45)",
-      backdropFilter: "blur(8px)",
-    };
-  })();
-
-  const E = ({ children }) => (
-    <span
-      style={{
-        display: "inline-flex",
-        width: 18,
-        justifyContent: "center",
-        alignItems: "center",
-        lineHeight: 1,
-        transform: "translateY(0.5px)",
-      }}
-    >
-      {children}
-    </span>
-  );
-
-  const btn = (variant = "solid") => {
-    const isNordic = theme === "Nordic";
-    const common = {
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 8,
-      width: "100%",
-      padding: "12px 14px",
-      borderRadius: 14,
-      fontWeight: 650,
-      letterSpacing: "0.2px",
-      textDecoration: "none",
-      cursor: "pointer",
-      userSelect: "none",
-      lineHeight: 1,
-      boxSizing: "border-box",
-    };
-
-    if (screen === "PAUSE") {
-      if (variant === "ghost")
-        return {
-          ...common,
-          background: "transparent",
-          border: "1px solid rgba(17, 24, 39, 0.12)",
-          color: "#111827",
-        };
-      return { ...common, background: "#111827", border: "1px solid #111827", color: "#ffffff" };
-    }
-
-    if (screen === "STARLEAF") {
-      if (variant === "ghost")
-        return {
-          ...common,
-          background: "transparent",
-          border: "1px solid rgba(154, 245, 154, 0.22)",
-          color: "#9AF59A",
-        };
-      return {
-        ...common,
-        background: "rgba(154, 245, 154, 0.10)",
-        border: "1px solid rgba(154, 245, 154, 0.30)",
-        color: "#9AF59A",
-      };
-    }
-
-    if (variant === "ghost")
-      return {
-        ...common,
-        background: "transparent",
-        border: isNordic ? "1px solid rgba(2, 6, 23, 0.16)" : "1px solid rgba(230, 238, 252, 0.18)",
-        color: isNordic ? "#0f172a" : "#e6eefc",
-      };
-
-    return {
-      ...common,
-      background: isNordic ? "#0f172a" : "rgba(230, 238, 252, 0.10)",
-      border: isNordic ? "1px solid #0f172a" : "1px solid rgba(230, 238, 252, 0.18)",
-      color: isNordic ? "#ffffff" : "#e6eefc",
-    };
-  };
-
-  const topTabStyle = (active) => ({
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    padding: "8px 12px",
-    borderRadius: 999,
-    border: "1px solid rgba(255,255,255,0.0)",
-    background: active ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.06)",
-    color: "inherit",
-    cursor: "pointer",
-    fontWeight: 650,
-    lineHeight: 1,
-    whiteSpace: "nowrap",
-    boxSizing: "border-box",
-  });
-
-  const themeBtnStyle = (active) => ({
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    padding: "8px 10px",
-    borderRadius: 12,
-    border: "1px solid rgba(255,255,255,0.0)",
-    background: active ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.06)",
-    color: "inherit",
-    cursor: "pointer",
-    fontWeight: 650,
-    lineHeight: 1,
-    whiteSpace: "nowrap",
-    boxSizing: "border-box",
-  });
-
-  const openingLines = [
-    "遠い昔、",
-    "遥か彼方の山奥で――",
-    "",
-    "スギ帝国は春の空を黄色く染め、",
-    "花粉デス・クラウドで人々の鼻と目を制圧していた。",
-    "",
-    "だが、呼吸を取り戻す者たちがいる。",
-    "広葉樹同盟軍。",
-    "",
-    "これは花粉症対策ではない。",
-    "健やかな呼吸を取り戻すための、",
-    "ささやかで確かな反撃の記録である。",
-  ];
-
   const goScreen = (next) => {
-    // STARLEAFから出たら演出をリセット
+    // STARLEAF以外へ移動する時は演出をリセット
     if (next !== "STARLEAF") {
       clearStarleafTimers();
       stopTheme();
@@ -322,163 +139,253 @@ export default function Page() {
     setScreen(next);
   };
 
+  const theme = useMemo(() => (screen !== "HOUSE" ? "plain" : houseTheme), [screen, houseTheme]);
+
+  const bg = (() => {
+    if (screen === "PAUSE") return { background: "#ffffff", color: "#111827" };
+    if (screen === "STARLEAF") return { background: "#050807", color: "#9AF59A" };
+    if (theme === "Nordic") return { background: "linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)", color: "#0f172a" };
+    return {
+      background:
+        "radial-gradient(1200px 600px at 20% 10%, rgba(140,180,255,0.25) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, #0b1020 0%, #0a0f1a 55%, #0d1424 100%)",
+      color: "#e6eefc",
+    };
+  })();
+
+  const panelStyle = {
+    maxWidth: 560,
+    margin: "0 auto",
+    borderRadius: 18,
+    padding: 16,
+    boxSizing: "border-box",
+    overflow: "hidden",
+    border: screen === "STARLEAF" ? "1px solid rgba(154,245,154,0.22)" : "1px solid rgba(0,0,0,0.10)",
+    background:
+      screen === "STARLEAF"
+        ? "rgba(10, 20, 16, 0.55)"
+        : theme === "Nordic"
+        ? "rgba(255,255,255,0.90)"
+        : "rgba(12, 18, 36, 0.75)",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+    backdropFilter: "blur(10px)",
+  };
+
+  const btn = (variant = "solid") => {
+    const common = {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      width: "100%",
+      padding: "14px",
+      borderRadius: 14,
+      fontWeight: 800,
+      textDecoration: "none",
+      cursor: "pointer",
+      border: "2px solid",
+      boxSizing: "border-box",
+    };
+
+    if (screen === "PAUSE") {
+      return {
+        ...common,
+        background: variant === "ghost" ? "transparent" : "#111827",
+        borderColor: "#111827",
+        color: variant === "ghost" ? "#111827" : "#fff",
+      };
+    }
+
+    if (screen === "STARLEAF") {
+      return {
+        ...common,
+        background: variant === "ghost" ? "transparent" : "rgba(154, 245, 154, 0.20)",
+        borderColor: "rgba(154, 245, 154, 0.50)",
+        color: "#9AF59A",
+      };
+    }
+
+    return {
+      ...common,
+      background: variant === "ghost" ? "transparent" : theme === "Nordic" ? "#0f172a" : "rgba(230, 238, 252, 0.20)",
+      borderColor: theme === "Nordic" ? "#0f172a" : "rgba(230, 238, 252, 0.40)",
+      color: variant === "ghost" ? (theme === "Nordic" ? "#0f172a" : "#e6eefc") : theme === "Nordic" ? "#fff" : "#e6eefc",
+    };
+  };
+
+  const topTabStyle = (active) => ({
+    padding: "10px 16px",
+    borderRadius: 999,
+    fontWeight: 900,
+    cursor: "pointer",
+    border: "2px solid",
+    borderColor: active
+      ? screen === "STARLEAF"
+        ? "rgba(154,245,154,0.75)"
+        : theme === "Nordic"
+        ? "#0f172a"
+        : "rgba(230,238,252,0.65)"
+      : "rgba(128,128,128,0.30)",
+    background: active
+      ? screen === "STARLEAF"
+        ? "rgba(154,245,154,0.14)"
+        : theme === "Nordic"
+        ? "#0f172a"
+        : "rgba(255,255,255,0.12)"
+      : "transparent",
+    color: active ? (theme === "Nordic" && screen !== "STARLEAF" ? "#fff" : "inherit") : "inherit",
+  });
+
   return (
-    <main style={{ ...base, ...bg }}>
+    <main style={{ minHeight: "100dvh", padding: 18, boxSizing: "border-box", fontFamily: "sans-serif", ...bg }}>
       <style>{`
         @keyframes crawlUp {
-          0%   { transform: translateY(62%); opacity: 0; }
-          6%   { opacity: 1; }
-          92%  { opacity: 1; }
-          100% { transform: translateY(-118%); opacity: 0; }
+          0% { transform: translateY(80%); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translateY(-120%); opacity: 0; }
         }
       `}</style>
 
-      <div style={card}>
-        <header style={{ textAlign: "center", marginTop: 10, marginBottom: 16 }}>
-          <div style={{ fontSize: 34, lineHeight: "34px", marginBottom: 6 }}>👑</div>
-          <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "0.4px" }}>nuru market</div>
+      <div style={{ maxWidth: 560, margin: "0 auto" }}>
+        <header style={{ textAlign: "center", marginBottom: 20 }}>
+          <div style={{ fontSize: 40 }}>👑</div>
+          <div style={{ fontSize: 20, fontWeight: 900 }}>nuru market</div>
 
-          {/* ★反映・遷移確認 */}
-          <div style={{ fontSize: 12, opacity: 0.6, marginTop: 6 }}>
+          {/* 反映確認 */}
+          <div style={{ fontSize: 11, opacity: 0.6, marginTop: 4 }}>
             {BUILD_TAG} / screen={screen}
           </div>
 
-          <div style={{ marginTop: 10, display: "flex", gap: 8, justifyContent: "center", alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ marginTop: 15, display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
             <button onClick={() => goScreen("HOUSE")} style={topTabStyle(screen === "HOUSE")}>
-              <E>🏠</E> <span>HOUSE</span>
+              🏠 HOUSE
             </button>
             <button onClick={() => goScreen("PAUSE")} style={topTabStyle(screen === "PAUSE")}>
-              <E>☕</E> <span>PAUSE</span>
+              ☕ PAUSE
             </button>
             <button onClick={() => goScreen("STARLEAF")} style={topTabStyle(screen === "STARLEAF")}>
-              <E>🌿</E> <span>STAR LEAF</span>
+              🌿 STAR LEAF
             </button>
           </div>
         </header>
 
-        <section style={{ ...panel, borderRadius: 18, padding: 16, boxSizing: "border-box", overflow: "hidden" }}>
+        <section style={panelStyle}>
           {screen === "HOUSE" && (
-            <>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                <div style={{ fontWeight: 800, fontSize: 16 }}>
-                  <E>🏠</E> <span>HOUSE</span>
-                </div>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <button onClick={() => setHouseTheme("Nordic")} style={themeBtnStyle(houseTheme === "Nordic")}>
-                    Nordic（明）
+            <div style={{ display: "grid", gap: 15 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontWeight: 900 }}>THEME</span>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button
+                    onClick={() => setHouseTheme("Nordic")}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 10,
+                      border: "1px solid rgba(0,0,0,0.25)",
+                      background: houseTheme === "Nordic" ? "#0f172a" : "transparent",
+                      color: houseTheme === "Nordic" ? "#fff" : "inherit",
+                      cursor: "pointer",
+                      fontWeight: 800,
+                    }}
+                  >
+                    Nordic
                   </button>
-                  <button onClick={() => setHouseTheme("Spaceship")} style={themeBtnStyle(houseTheme === "Spaceship")}>
-                    Spaceship（暗）
+                  <button
+                    onClick={() => setHouseTheme("Spaceship")}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 10,
+                      border: "1px solid rgba(0,0,0,0.25)",
+                      background: houseTheme === "Spaceship" ? "rgba(255,255,255,0.9)" : "transparent",
+                      color: houseTheme === "Spaceship" ? "#0b1020" : "inherit",
+                      cursor: "pointer",
+                      fontWeight: 800,
+                    }}
+                  >
+                    Spaceship
                   </button>
                 </div>
               </div>
 
-              <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-                <Link href="/my-room" style={btn()}>
-                  <E>🏠</E> <span>MY ROOM</span>
-                </Link>
-
-                <button onClick={() => goScreen("PAUSE")} style={btn()}>
-                  <E>☕</E> <span>PAUSE</span>
-                </button>
-
-                <button onClick={() => goScreen("STARLEAF")} style={btn()}>
-                  <E>🌿</E> <span>STAR LEAF</span>
-                </button>
-
-                <Link href="/board" style={btn("ghost")}>
-                  <E>🧾</E> <span>BOARD</span>
-                </Link>
-              </div>
-
-              <div style={{ marginTop: 14, opacity: theme === "Nordic" ? 0.75 : 0.72, fontSize: 12, lineHeight: 1.6 }}>
-                <div>・ここは公共の場（マーケット）</div>
-                <div>・MY ROOM はあなた専用（端末内）</div>
-              </div>
-            </>
+              <Link href="/my-room" style={btn()}>
+                🏠 MY ROOM
+              </Link>
+              <button onClick={() => goScreen("PAUSE")} style={btn()}>
+                ☕ PAUSE
+              </button>
+              <button onClick={() => goScreen("STARLEAF")} style={btn()}>
+                🌿 STAR LEAF
+              </button>
+              <Link href="/board" style={btn("ghost")}>
+                🧾 BOARD
+              </Link>
+            </div>
           )}
 
           {screen === "PAUSE" && (
-            <>
-              <div style={{ fontWeight: 850, fontSize: 16 }}>
-                <E>☕</E> <span>PAUSE（入口）</span>
-              </div>
-              <div style={{ marginTop: 8, fontSize: 13, opacity: 0.8, lineHeight: 1.7 }}>
-                白背景・静かな入口。ここから各部屋へ。
-              </div>
-
-              <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-                <Link href="/board" style={btn("ghost")}>
-                  <E>🧾</E> <span>/board</span>
-                </Link>
-
-                <Link href="/rooms/yottemita" style={btn("ghost")}>/rooms/yottemita</Link>
-                <Link href="/rooms/poem" style={btn("ghost")}>/rooms/poem</Link>
-                <Link href="/rooms/manager" style={btn("ghost")}>/rooms/manager</Link>
-                <Link href="/rooms/echo" style={btn("ghost")}>/rooms/echo（会話OK）</Link>
-                <Link href="/rooms/starleaf" style={btn("ghost")}>/rooms/starleaf（世界観・会話OK）</Link>
-
-                <button onClick={() => goScreen("HOUSE")} style={btn()}>
-                  ← HOUSEへ戻る
-                </button>
-              </div>
-            </>
+            <div style={{ display: "grid", gap: 12 }}>
+              <div style={{ fontWeight: 900 }}>☕ PAUSE ROOMS</div>
+              <Link href="/board" style={btn("ghost")}>
+                🧾 /board
+              </Link>
+              <Link href="/rooms/yottemita" style={btn("ghost")}>
+                /rooms/yottemita
+              </Link>
+              <Link href="/rooms/poem" style={btn("ghost")}>
+                /rooms/poem
+              </Link>
+              <Link href="/rooms/manager" style={btn("ghost")}>
+                /rooms/manager
+              </Link>
+              <button onClick={() => goScreen("HOUSE")} style={btn()}>
+                🏠 HOUSEに戻る
+              </button>
+            </div>
           )}
 
           {screen === "STARLEAF" && (
-            <>
-              <div style={{ fontWeight: 900, fontSize: 16, letterSpacing: "0.6px" }}>
-                <E>🌿</E> <span>STAR LEAF</span>
-              </div>
+            <div style={{ display: "grid", gap: 15 }}>
+              <div style={{ fontWeight: 900, color: "#9AF59A" }}>🌿 STAR LEAF DECK</div>
 
-              {/* ★必ず出る：開始ボタン2つ */}
-              <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
-                <button onClick={startOpening} style={btn()}>
-                  <E>▶</E> <span>テロップ（音楽付き）</span>
-                </button>
+              {/* ここは常に出る */}
+              <button onClick={startOpening} style={btn()}>
+                ▶ テロップ（音楽付き）
+              </button>
+              <Link href="/rooms/starleaf" style={btn("ghost")}>
+                🎮 ゲーム開始
+              </Link>
 
-                <Link href="/rooms/starleaf" style={btn("ghost")}>
-                  <E>🎮</E> <span>ゲーム開始</span>
-                </Link>
-              </div>
-
-              {/* opening：黄テロップ */}
               {starleafPhase === "opening" && (
                 <div
                   style={{
-                    marginTop: 12,
-                    borderRadius: 16,
-                    border: "1px solid rgba(154, 245, 154, 0.18)",
-                    background: "rgba(0,0,0,0.45)",
-                    overflow: "hidden",
+                    height: 260,
+                    background: "#000",
                     position: "relative",
-                    height: 220,
+                    overflow: "hidden",
+                    borderRadius: 15,
+                    border: "2px solid rgba(154,245,154,0.55)",
                   }}
                 >
                   <div
                     key={crawlKey}
                     style={{
                       position: "absolute",
-                      left: 16,
-                      right: 16,
-                      bottom: -40,
-                      color: "#F6D34A",
-                      fontWeight: 800,
-                      letterSpacing: "0.6px",
-                      lineHeight: 1.55,
+                      width: "100%",
                       textAlign: "center",
+                      color: "#F6D34A",
                       animation: `crawlUp ${OPENING_MS}ms linear forwards`,
-                      textShadow: "0 2px 12px rgba(0,0,0,0.55)",
-                      willChange: "transform",
+                      padding: 20,
+                      boxSizing: "border-box",
+                      fontWeight: 900,
+                      letterSpacing: "0.4px",
+                      lineHeight: 1.6,
                     }}
                   >
-                    <div style={{ fontSize: 13, opacity: 0.95 }}>STAR LEAF</div>
-                    <div style={{ fontSize: 16, marginTop: 4 }}>EPISODE</div>
-                    <div style={{ fontSize: 18, marginTop: 4 }}>— NEW BREATH —</div>
+                    <div style={{ fontSize: 18 }}>EPISODE</div>
+                    <div style={{ fontSize: 22, marginTop: 4 }}>— NEW BREATH —</div>
 
-                    <div style={{ marginTop: 14, fontSize: 14, opacity: 0.98 }}>
-                      {openingLines.map((line, i) => (
-                        <div key={i}>{line === "" ? <span>&nbsp;</span> : line}</div>
+                    <div style={{ marginTop: 18, fontSize: 14, fontWeight: 800 }}>
+                      {openingLines.map((l, i) => (
+                        <div key={i}>{l === "" ? <span>&nbsp;</span> : l}</div>
                       ))}
                     </div>
                   </div>
@@ -489,15 +396,13 @@ export default function Page() {
                       position: "absolute",
                       top: 10,
                       right: 10,
-                      padding: "8px 10px",
-                      borderRadius: 12,
-                      border: "1px solid rgba(154, 245, 154, 0.22)",
-                      background: "rgba(154, 245, 154, 0.08)",
+                      background: "rgba(154,245,154,0.18)",
                       color: "#9AF59A",
+                      border: "1px solid rgba(154,245,154,0.55)",
+                      borderRadius: 10,
+                      padding: "7px 10px",
                       cursor: "pointer",
-                      fontWeight: 700,
-                      lineHeight: 1,
-                      boxSizing: "border-box",
+                      fontWeight: 900,
                     }}
                   >
                     SKIP
@@ -505,39 +410,20 @@ export default function Page() {
                 </div>
               )}
 
-              {/* scanning / ready 表示 */}
-              <div style={{ marginTop: 12, fontSize: 13, lineHeight: 1.7 }}>
-                {starleafPhase === "scanning" ? (
-                  <div style={{ opacity: 0.92 }}>
-                    <div style={{ fontWeight: 850, letterSpacing: "1px" }}>SCANNING START</div>
-                    <div style={{ marginTop: 8, opacity: 0.8 }}>……………</div>
-                  </div>
-                ) : starleafPhase === "ready" ? (
-                  <div style={{ opacity: 0.92 }}>
-                    <div style={{ fontWeight: 850, letterSpacing: "0.6px" }}>READY</div>
-                    <div style={{ marginTop: 6, opacity: 0.8 }}>黒背景・緑文字。ここは演出画面。</div>
-                  </div>
-                ) : (
-                  <div style={{ opacity: 0.72 }}>※ ボタンで開始</div>
-                )}
-              </div>
+              {starleafPhase === "scanning" && <div style={{ textAlign: "center", padding: 18 }}>📡 SCANNING...</div>}
 
               {starleafPhase === "ready" && (
-                <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+                <div style={{ display: "grid", gap: 10 }}>
+                  <div style={{ textAlign: "center", fontWeight: 900 }}>✅ READY</div>
                   <Link href="/rooms/starleaf" style={btn()}>
-                    <E>🗣️</E> <span>STAR LEAF を語る部屋へ</span>
+                    🗣️ STAR LEAFを語る部屋
                   </Link>
-
                   <button onClick={() => goScreen("HOUSE")} style={btn("ghost")}>
-                    ヌールマーケット（HOUSE）へ戻る
+                    🏠 HOUSEに戻る
                   </button>
                 </div>
               )}
-
-              <div style={{ marginTop: 14, fontSize: 12, opacity: 0.72 }}>
-                ※ 雑談は /rooms/echo、世界観は /rooms/starleaf
-              </div>
-            </>
+            </div>
           )}
         </section>
       </div>
