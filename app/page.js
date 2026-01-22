@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 
 export default function Home() {
-  const [view, setView] = useState("HOUSE"); // HOUSE | PAUSE | STAR
+  const [view, setView] = useState("HOUSE");
 
   const bg = "#05070f";
   const card = "#0b1020";
@@ -31,18 +31,14 @@ export default function Home() {
     textAlign: "center",
   };
 
-  const btnBase = {
-    padding: "16px 20px",
+  const btn = {
+    padding: "14px 18px",
     borderRadius: 18,
-    fontSize: 15,
+    fontSize: 14,
     cursor: "pointer",
     border: `1px solid ${border}`,
     background: "rgba(255,255,255,0.04)",
     color: text,
-  };
-
-  const linkBtn = {
-    ...btnBase,
     textDecoration: "none",
     display: "inline-flex",
     alignItems: "center",
@@ -65,12 +61,9 @@ export default function Home() {
 
           <div style={frame}>
             <div style={{ fontSize: 64, marginBottom: 8 }}>👑</div>
-            <div style={{ fontSize: 13, letterSpacing: 1 }}>
-              Owner&nbsp;Yocchi
-            </div>
+            <div style={{ fontSize: 13 }}>Owner Yocchi</div>
           </div>
 
-          {/* ボタンゾーン */}
           <div
             style={{
               maxWidth: 720,
@@ -80,100 +73,48 @@ export default function Home() {
               gap: 18,
             }}
           >
-            <button style={btnBase} onClick={() => setView("PAUSE")}>
+            <button style={btn} onClick={() => setView("PAUSE")}>
               ☕ PAUSE
             </button>
-
-            <button style={btnBase} onClick={() => setView("STAR")}>
+            <button style={btn} onClick={() => setView("STAR")}>
               🌿 STAR LEAF
             </button>
-
-            <Link href="/board" style={linkBtn}>
+            <Link href="/board" style={btn}>
               🧾 BOARD
             </Link>
-          </div>
-
-          <div
-            style={{
-              textAlign: "center",
-              marginTop: 18,
-              fontSize: 12,
-              color: sub,
-            }}
-          >
-            House → Pause / Star Leaf / Board
           </div>
         </>
       )}
 
       {view === "PAUSE" && (
-        <>
-          <div style={{ textAlign: "center", marginBottom: 18 }}>
-            <div style={{ fontSize: 22, letterSpacing: 4, fontWeight: 700 }}>
-              PAUSE
-            </div>
-            <div style={{ fontSize: 12, color: sub, marginTop: 6 }}>
-              quiet entrance
-            </div>
+        <div style={frame}>
+          <button onClick={() => setView("HOUSE")} style={btn}>
+            ← HOUSE
+          </button>
+
+          <div style={{ marginTop: 18, fontSize: 20 }}>PAUSE</div>
+          <div style={{ marginTop: 6, color: sub }}>
+            くつろいでいってください。
           </div>
 
-          <div style={frame}>
-            <button
-              onClick={() => setView("HOUSE")}
-              style={{ ...btnBase, marginBottom: 16 }}
-            >
-              ← HOUSE
-            </button>
-
-            <div style={{ fontSize: 16, marginBottom: 10, color: sub }}>
-              くつろいでいってください。
-            </div>
-
-            {/* ★ 追加：PAUSE内の導線 */}
-            <div
-              style={{
-                display: "grid",
-                gap: 14,
-                justifyItems: "center",
-                marginTop: 12,
-              }}
-            >
-              <Link href="/board" style={{ ...linkBtn, width: "min(420px, 100%)" }}>
-                🧾 BOARD（ひとこと残す）
-              </Link>
-
-              <div style={{ width: "min(520px, 100%)", color: sub, fontSize: 12 }}>
-                「くつろぐ」→「ひとこと置く」への直行導線
-              </div>
-            </div>
+          {/* ★ ここが追加ポイント */}
+          <div style={{ marginTop: 22 }}>
+            <Link href="/board" style={btn}>
+              🧾 BOARD（ひとこと残す）
+            </Link>
           </div>
-        </>
+        </div>
       )}
 
       {view === "STAR" && (
-        <>
-          <div style={{ textAlign: "center", marginBottom: 18 }}>
-            <div style={{ fontSize: 22, letterSpacing: 4, fontWeight: 700 }}>
-              STAR LEAF
-            </div>
-            <div style={{ fontSize: 12, color: sub, marginTop: 6 }}>
-              scanning zone
-            </div>
+        <div style={frame}>
+          <button onClick={() => setView("HOUSE")} style={btn}>
+            ← HOUSE
+          </button>
+          <div style={{ marginTop: 18, color: "#22c55e" }}>
+            STAR LEAF
           </div>
-
-          <div style={frame}>
-            <button
-              onClick={() => setView("HOUSE")}
-              style={{ ...btnBase, marginBottom: 16 }}
-            >
-              ← HOUSE
-            </button>
-
-            <div style={{ fontSize: 16, color: "#22c55e" }}>
-              READY.
-            </div>
-          </div>
-        </>
+        </div>
       )}
     </div>
   );
