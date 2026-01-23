@@ -1,47 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 export default function Page() {
-  const BUILD_TAG = "BUILD_20260123_STARLEAF_TICKER_BTN_ALWAYS";
+  const BUILD_TAG = "BUILD_20260123_STARLEAF_LABEL_FIX";
 
-  // 画面キーは固定（表示名は自由）
-  const [screen, setScreen] = useState("HOUSE"); // "HOUSE" | "PAUSE" | "STARLEAF"
-  const [houseTheme, setHouseTheme] = useState("Nordic"); // "Nordic" | "Spaceship"
+  // 画面キー：HOUSE / PAUSE / STARLEAF
+  const [screen, setScreen] = useState("HOUSE");
+  const [houseTheme, setHouseTheme] = useState("Nordic");
 
   // STAR LEAF 演出：idle -> opening -> scanning -> ready
   const [starleafPhase, setStarleafPhase] = useState("idle");
   const [crawlKey, setCrawlKey] = useState(0);
 
-  // timers
   const tOpenRef = useRef(null);
   const tReadyRef = useRef(null);
 
-  // WebAudio
+  // 音（WebAudio）
   const audioCtxRef = useRef(null);
   const playingRef = useRef(false);
 
   const OPENING_MS = 9500; // 8〜12秒帯
   const SCANNING_MS = 2000;
 
-  const openingLines = useMemo(
-    () => [
-      "遠い昔、遥か彼方の山奥で…",
-      "",
-      "春になると、スギ帝国（The Cedar Empire）が",
-      "花粉デス・クラウドを放ち、人々の鼻と目は絶望した。",
-      "",
-      "しかし、広葉樹同盟軍（Broadleaf Alliance）は",
-      "『健やかな呼吸（The Oxygen）』を取り戻すため立ち上がる。",
-      "",
-      "あなたのスマホは “スマート・セーバー”。",
-      "見えない敵をスキャンし、この茶番…いえ、サーガを始めよ。",
-      "",
-      "―― STAR WOODS：EP4『新たなる鼻炎』",
-    ],
-    []
-  );
+  const openingLines = [
+    "遠い遠い、静かな海の底。",
+    "光の届かない場所で、芽吹きは始まった。",
+    "",
+    "STAR LEAF —— それは“語り”が育つ森。",
+    "言葉が、潮のように満ち引きする場所。",
+    "",
+    "あなたは今、入口に立っている。",
+    "始めるのは、いつでもいい。",
+  ];
 
   const clearStarleafTimers = () => {
     if (tOpenRef.current) {
@@ -63,13 +55,11 @@ export default function Page() {
   };
 
   const playTheme = () => {
-    // ユーザー操作（ボタン）から呼ばれる前提：ブラウザ制限を回避
     try {
       if (playingRef.current) return;
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       const ctx = audioCtxRef.current || new AudioContext();
       audioCtxRef.current = ctx;
-
       if (ctx.state === "suspended") ctx.resume();
       playingRef.current = true;
 
@@ -84,19 +74,15 @@ export default function Page() {
         const g = ctx.createGain();
         o.type = type;
         o.frequency.setValueAtTime(freq, t);
-
         g.gain.setValueAtTime(0.0001, t);
         g.gain.exponentialRampToValueAtTime(gain, t + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-
         o.connect(g);
         g.connect(master);
-
         o.start(t);
         o.stop(t + dur + 0.02);
       };
 
-      // それっぽい短いパターン（著作権メロディは避ける）
       const pattern = [
         { f: 440, dt: 0.0, d: 0.28, type: "sawtooth", g: 0.55 },
         { f: 330, dt: 0.32, d: 0.38, type: "sawtooth", g: 0.55 },
@@ -107,7 +93,6 @@ export default function Page() {
 
       const loopLen = 1.2;
       const loops = Math.ceil(OPENING_MS / 1000 / loopLen);
-
       for (let i = 0; i < loops; i++) {
         const baseT = startAt + i * loopLen;
         for (const p of pattern) makeTone(p.f, baseT + p.dt, p.d, p.type, p.g);
@@ -119,15 +104,9 @@ export default function Page() {
 
   const startOpening = () => {
     clearStarleafTimers();
-
-    // まず opening にして、テロップを必ず描画
     setStarleafPhase("opening");
     setCrawlKey((v) => v + 1);
-
-    // BGMはここで開始（ユーザー操作中）
     playTheme();
-
-    // opening -> scanning -> ready
     tOpenRef.current = setTimeout(() => setStarleafPhase("scanning"), OPENING_MS);
     tReadyRef.current = setTimeout(() => {
       setStarleafPhase("ready");
@@ -142,29 +121,13 @@ export default function Page() {
     tReadyRef.current = setTimeout(() => setStarleafPhase("ready"), SCANNING_MS);
   };
 
-  const resetStarleaf = () => {
-    clearStarleafTimers();
-    stopTheme();
-    setStarleafPhase("idle");
-  };
-
-  const goScreen = (next) => {
-    resetStarleaf();
-    setScreen(next);
-  };
-
-  // 画面を抜けたら演出止める
-  useEffect(() => {
-    if (screen !== "STARLEAF") resetStarleaf();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen]);
-
   const theme = useMemo(() => (screen !== "HOUSE" ? "plain" : houseTheme), [screen, houseTheme]);
 
   const bg = (() => {
     if (screen === "PAUSE") return { background: "#ffffff", color: "#111827" };
     if (screen === "STARLEAF") return { background: "#050807", color: "#9AF59A" };
-    if (theme === "Nordic") return { background: "linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)", color: "#0f172a" };
+    if (theme === "Nordic")
+      return { background: "linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)", color: "#0f172a" };
     return {
       background:
         "radial-gradient(1200px 600px at 20% 10%, rgba(140,180,255,0.25) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, #0b1020 0%, #0a0f1a 55%, #0d1424 100%)",
@@ -194,11 +157,10 @@ export default function Page() {
       width: "100%",
       padding: "14px",
       borderRadius: 14,
-      fontWeight: 800,
+      fontWeight: 700,
       textDecoration: "none",
       cursor: "pointer",
       border: "2px solid",
-      userSelect: "none",
     };
 
     if (screen === "PAUSE") {
@@ -213,7 +175,7 @@ export default function Page() {
     if (screen === "STARLEAF") {
       return {
         ...common,
-        background: variant === "ghost" ? "transparent" : "rgba(154, 245, 154, 0.22)",
+        background: variant === "ghost" ? "transparent" : "rgba(154, 245, 154, 0.20)",
         borderColor: "rgba(154, 245, 154, 0.55)",
         color: "#9AF59A",
       };
@@ -221,31 +183,38 @@ export default function Page() {
 
     return {
       ...common,
-      background: variant === "ghost" ? "transparent" : theme === "Nordic" ? "#0f172a" : "rgba(230, 238, 252, 0.22)",
-      borderColor: theme === "Nordic" ? "#0f172a" : "rgba(230, 238, 252, 0.42)",
+      background: variant === "ghost" ? "transparent" : theme === "Nordic" ? "#0f172a" : "rgba(230, 238, 252, 0.2)",
+      borderColor: theme === "Nordic" ? "#0f172a" : "rgba(230, 238, 252, 0.4)",
       color: variant === "ghost" ? (theme === "Nordic" ? "#0f172a" : "#e6eefc") : theme === "Nordic" ? "#fff" : "#e6eefc",
     };
   };
 
-  const topTabStyle = (active) => ({
+  const topTabStyle = (active, isStar) => ({
     padding: "10px 16px",
     borderRadius: 999,
-    fontWeight: 900,
+    fontWeight: 700,
     cursor: "pointer",
     border: "2px solid",
     borderColor: active ? (theme === "Nordic" ? "#0f172a" : "#9AF59A") : "rgba(128,128,128,0.3)",
-    background: active ? (theme === "Nordic" ? "#0f172a" : "rgba(255,255,255,0.18)") : "transparent",
-    color: active ? "#fff" : "inherit",
+    background: active ? (theme === "Nordic" ? "#0f172a" : "rgba(255,255,255,0.2)") : "transparent",
+    color: active ? (theme === "Nordic" ? "#fff" : "#fff") : isStar ? "#9AF59A" : "inherit",
   });
+
+  function goScreen(next) {
+    clearStarleafTimers();
+    stopTheme();
+    setStarleafPhase("idle");
+    setScreen(next);
+  }
 
   return (
     <main style={{ minHeight: "100dvh", padding: 18, boxSizing: "border-box", fontFamily: "sans-serif", ...bg }}>
       <style>{`
         @keyframes crawlUp {
-          0%   { transform: translateY(85%); opacity: 0; }
-          8%   { opacity: 1; }
-          92%  { opacity: 1; }
-          100% { transform: translateY(-140%); opacity: 0; }
+          0%   { transform: translateY(80%);  opacity: 0; }
+          10%  { opacity: 1; }
+          90%  { opacity: 1; }
+          100% { transform: translateY(-120%); opacity: 0; }
         }
       `}</style>
 
@@ -256,13 +225,13 @@ export default function Page() {
           <div style={{ fontSize: 10, opacity: 0.5 }}>{BUILD_TAG}</div>
 
           <div style={{ marginTop: 15, display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-            <button onClick={() => goScreen("HOUSE")} style={topTabStyle(screen === "HOUSE")}>
+            <button onClick={() => goScreen("HOUSE")} style={topTabStyle(screen === "HOUSE", false)}>
               🏠 HOUSE
             </button>
-            <button onClick={() => goScreen("PAUSE")} style={topTabStyle(screen === "PAUSE")}>
+            <button onClick={() => goScreen("PAUSE")} style={topTabStyle(screen === "PAUSE", false)}>
               ☕ PAUSE
             </button>
-            <button onClick={() => goScreen("STARLEAF")} style={topTabStyle(screen === "STARLEAF")}>
+            <button onClick={() => goScreen("STARLEAF")} style={topTabStyle(screen === "STARLEAF", true)}>
               🌿 STAR LEAF
             </button>
           </div>
@@ -273,17 +242,15 @@ export default function Page() {
             <div style={{ display: "grid", gap: 15 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontWeight: 900 }}>THEME</span>
-                <div style={{ display: "flex", gap: 6 }}>
+                <div style={{ display: "flex", gap: 5 }}>
                   <button
                     onClick={() => setHouseTheme("Nordic")}
                     style={{
-                      padding: "6px 10px",
-                      borderRadius: 10,
+                      padding: "5px 10px",
+                      borderRadius: 8,
                       border: "1px solid",
                       background: houseTheme === "Nordic" ? "#000" : "transparent",
                       color: houseTheme === "Nordic" ? "#fff" : "inherit",
-                      fontWeight: 800,
-                      cursor: "pointer",
                     }}
                   >
                     Nordic
@@ -291,13 +258,11 @@ export default function Page() {
                   <button
                     onClick={() => setHouseTheme("Spaceship")}
                     style={{
-                      padding: "6px 10px",
-                      borderRadius: 10,
+                      padding: "5px 10px",
+                      borderRadius: 8,
                       border: "1px solid",
                       background: houseTheme === "Spaceship" ? "#fff" : "transparent",
                       color: houseTheme === "Spaceship" ? "#000" : "inherit",
-                      fontWeight: 800,
-                      cursor: "pointer",
                     }}
                   >
                     Spaceship
@@ -332,16 +297,6 @@ export default function Page() {
               <Link href="/rooms/poem" style={btn("ghost")}>
                 /rooms/poem
               </Link>
-              <Link href="/rooms/manager" style={btn("ghost")}>
-                /rooms/manager
-              </Link>
-              <Link href="/rooms/echo" style={btn("ghost")}>
-                /rooms/echo（雑談OK）
-              </Link>
-              <Link href="/rooms/starleaf" style={btn("ghost")}>
-                /rooms/starleaf（世界観）
-              </Link>
-
               <button onClick={() => goScreen("HOUSE")} style={btn()}>
                 🏠 HOUSEに戻る
               </button>
@@ -349,28 +304,26 @@ export default function Page() {
           )}
 
           {screen === "STARLEAF" && (
-            <div style={{ display: "grid", gap: 14 }}>
+            <div style={{ display: "grid", gap: 15 }}>
               <div style={{ fontWeight: 900, color: "#9AF59A" }}>🌿 STAR LEAF DECK</div>
 
-              {/* ここは常に表示：ボタンが消える事故をなくす */}
+              {/* 常時表示（ここが「出ない」対策の本丸：phaseに関係なく表示） */}
               <button onClick={startOpening} style={btn()}>
                 ▶ テロップ開始（BGM）
               </button>
-
               <Link href="/rooms/starleaf" style={btn("ghost")}>
                 🎮 ゲーム開始（/rooms/starleaf）
               </Link>
 
-              {/* opening */}
               {starleafPhase === "opening" && (
                 <div
                   style={{
-                    height: 260,
+                    height: 250,
                     background: "#000",
                     position: "relative",
                     overflow: "hidden",
                     borderRadius: 15,
-                    border: "2px solid rgba(154,245,154,0.65)",
+                    border: "2px solid #9AF59A",
                   }}
                 >
                   <div
@@ -381,16 +334,13 @@ export default function Page() {
                       textAlign: "center",
                       color: "#F6D34A",
                       animation: `crawlUp ${OPENING_MS}ms linear forwards`,
-                      padding: 18,
-                      boxSizing: "border-box",
-                      fontWeight: 700,
+                      padding: 20,
                     }}
                   >
-                    <div style={{ fontSize: 18, fontWeight: 900, letterSpacing: 1 }}>STAR WOODS</div>
-                    <div style={{ fontSize: 14, opacity: 0.9, marginTop: 6 }}>EPISODE 4 / 新たなる鼻炎</div>
-                    <div style={{ marginTop: 14, fontSize: 14, lineHeight: 1.7 }}>
+                    <div style={{ fontSize: 20, fontWeight: 900 }}>EPISODE: NEW BREATH</div>
+                    <div style={{ marginTop: 20, fontSize: 14, lineHeight: 1.6 }}>
                       {openingLines.map((l, i) => (
-                        <div key={i}>{l === "" ? "\u00A0" : l}</div>
+                        <div key={i}>{l || <br />}</div>
                       ))}
                     </div>
                   </div>
@@ -401,13 +351,13 @@ export default function Page() {
                       position: "absolute",
                       top: 10,
                       right: 10,
-                      background: "rgba(154,245,154,0.25)",
+                      background: "rgba(154,245,154,0.30)",
                       color: "#9AF59A",
-                      border: "1px solid rgba(154,245,154,0.6)",
-                      borderRadius: 10,
+                      border: "1px solid",
+                      borderRadius: 6,
                       padding: "6px 10px",
-                      fontWeight: 900,
                       cursor: "pointer",
+                      fontWeight: 800,
                     }}
                   >
                     SKIP
@@ -415,19 +365,13 @@ export default function Page() {
                 </div>
               )}
 
-              {/* scanning */}
-              {starleafPhase === "scanning" && (
-                <div style={{ textAlign: "center", padding: 16, border: "1px solid rgba(154,245,154,0.35)", borderRadius: 14 }}>
-                  📡 SCANNING...
-                </div>
-              )}
+              {starleafPhase === "scanning" && <div style={{ textAlign: "center", padding: 20 }}>📡 SCANNING...</div>}
 
-              {/* ready */}
               {starleafPhase === "ready" && (
                 <div style={{ display: "grid", gap: 10 }}>
                   <div style={{ textAlign: "center", fontWeight: 900 }}>✅ READY</div>
                   <Link href="/rooms/starleaf" style={btn()}>
-                    🗣️ STAR LEAF を語る部屋へ
+                    🗣️ STAR LEAFを語る部屋へ
                   </Link>
                   <button onClick={() => goScreen("HOUSE")} style={btn("ghost")}>
                     🏠 ヌルマーケット（HOUSE）へ戻る
@@ -435,10 +379,11 @@ export default function Page() {
                 </div>
               )}
 
-              {/* idle */}
               {starleafPhase === "idle" && (
-                <div style={{ fontSize: 12, opacity: 0.9 }}>
-                  ※ 「▶ テロップ開始」を押すと opening → scanning → ready に進む（スキップ可）
+                <div style={{ fontSize: 12, opacity: 0.8, lineHeight: 1.6 }}>
+                  黒背景・緑文字。ここは演出デッキ。
+                  <br />
+                  ※ 雑談は /rooms/echo、世界観は /rooms/starleaf
                 </div>
               )}
             </div>
@@ -448,4 +393,4 @@ export default function Page() {
     </main>
   );
 }
-}
+
