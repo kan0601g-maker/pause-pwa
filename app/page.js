@@ -1,138 +1,103 @@
 // app/page.js
-import Link from "next/link";
-
 export default function HomePage() {
+  const items = [
+    { href: "/pause", title: "pause", desc: "休憩・呼吸を整える", icon: "💤" },
+    { href: "/rooms/starleaf", title: "STAR LEAF", desc: "演出・世界観（別ページ）", icon: "🍃" },
+    { href: "/my-room", title: "my-room", desc: "個室（作業・整理）", icon: "🏠" },
+    { href: "/rooms/echo", title: "echo", desc: "雑談・ログ", icon: "💬" },
+    { href: "/board", title: "board", desc: "掲示・共有", icon: "📌" },
+  ];
+
   return (
     <main
       style={{
         minHeight: "100vh",
-        backgroundColor: "#fafafa",
+        background: "#fafafa",
         color: "#111",
       }}
     >
-      {/* 中央カラム（これが効いてないと全部ダメ） */}
+      {/* 中央寄せの本体 */}
       <div
         style={{
-          maxWidth: "720px",
+          maxWidth: 760,
           margin: "0 auto",
           padding: "48px 24px",
         }}
       >
-        {/* ヘッダー */}
-        <header style={{ marginBottom: "32px" }}>
-          <div style={{ fontSize: "14px", color: "#666" }}>
-            nuru market
-          </div>
+        {/* ★反映確認タグ（これが見えたら成功） */}
+        <div
+          style={{
+            display: "inline-block",
+            fontSize: 12,
+            color: "#666",
+            background: "#fff",
+            border: "1px solid #ddd",
+            borderRadius: 999,
+            padding: "6px 10px",
+          }}
+        >
+          HOME_HUB_INLINE_BUILD_20260123
+        </div>
 
-          <h1
-            style={{
-              marginTop: "8px",
-              fontSize: "28px",
-              fontWeight: "bold",
-            }}
-          >
+        <header style={{ marginTop: 14, marginBottom: 28 }}>
+          <div style={{ fontSize: 14, color: "#666" }}>nuru market</div>
+
+          <h1 style={{ margin: "10px 0 0", fontSize: 30, fontWeight: 800 }}>
             HOME（入口・ハブ）
           </h1>
 
-          <p
-            style={{
-              marginTop: "12px",
-              fontSize: "14px",
-              lineHeight: "1.7",
-              color: "#444",
-            }}
-          >
+          <p style={{ marginTop: 12, fontSize: 14, lineHeight: 1.75, color: "#444" }}>
             ここは入口です。下の部屋を選んで移動してください。<br />
             ※ STAR LEAF は演出専用で、HOMEではありません。
           </p>
         </header>
 
-        {/* リンク一覧 */}
-        <section style={{ display: "grid", gap: "16px" }}>
-          <HubItem
-            icon="💤"
-            title="pause"
-            href="/pause"
-            description="休憩・呼吸を整える"
-          />
-          <HubItem
-            icon="🍃"
-            title="STAR LEAF"
-            href="/rooms/starleaf"
-            description="演出・世界観（別ページ）"
-          />
-          <HubItem
-            icon="🏠"
-            title="my-room"
-            href="/my-room"
-            description="個室（作業・整理）"
-          />
-          <HubItem
-            icon="💬"
-            title="echo"
-            href="/rooms/echo"
-            description="雑談・ログ"
-          />
-          <HubItem
-            icon="📌"
-            title="board"
-            href="/board"
-            description="掲示・共有"
-          />
+        <section style={{ display: "grid", gap: 14 }}>
+          {items.map((it) => (
+            <a
+              key={it.href}
+              href={it.href}
+              style={{
+                display: "block",
+                textDecoration: "none",
+                color: "#111",
+                background: "#fff",
+                border: "1px solid #ddd",
+                borderRadius: 16,
+                padding: 16,
+              }}
+            >
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div style={{ fontSize: 24, width: 34, textAlign: "center" }}>{it.icon}</div>
+                <div>
+                  <div style={{ fontWeight: 800 }}>{it.title}</div>
+                  <div style={{ fontSize: 14, color: "#555", marginTop: 2 }}>{it.desc}</div>
+                  <div style={{ fontSize: 12, color: "#888", marginTop: 6 }}>{it.href}</div>
+                </div>
+              </div>
+            </a>
+          ))}
         </section>
 
-        {/* フッター */}
         <footer
           style={{
-            marginTop: "40px",
-            padding: "16px",
-            backgroundColor: "#fff",
+            marginTop: 34,
+            padding: 16,
+            background: "#fff",
             border: "1px solid #ddd",
-            borderRadius: "12px",
-            fontSize: "14px",
+            borderRadius: 16,
+            fontSize: 14,
             color: "#444",
           }}
         >
-          <strong>運用ルール</strong>
-          <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
-            <li>HOME（/）はリンク集だけ</li>
+          <div style={{ fontWeight: 800, color: "#111" }}>運用ルール</div>
+          <ul style={{ marginTop: 10, paddingLeft: 20, lineHeight: 1.7 }}>
+            <li>HOME（/）はリンク集だけ（演出・stateは持たせない）</li>
             <li>演出は rooms 配下で自己完結</li>
             <li>迷ったら必ず HOME に戻る</li>
           </ul>
         </footer>
       </div>
     </main>
-  );
-}
-
-/* ===== 部品 ===== */
-
-function HubItem({ icon, title, href, description }) {
-  return (
-    <Link
-      href={href}
-      style={{
-        display: "block",
-        textDecoration: "none",
-        color: "#111",
-        backgroundColor: "#fff",
-        border: "1px solid #ddd",
-        borderRadius: "14px",
-        padding: "16px",
-      }}
-    >
-      <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-        <div style={{ fontSize: "24px" }}>{icon}</div>
-        <div>
-          <div style={{ fontWeight: "bold" }}>{title}</div>
-          <div style={{ fontSize: "14px", color: "#555" }}>
-            {description}
-          </div>
-          <div style={{ fontSize: "13px", color: "#888", marginTop: "4px" }}>
-            {href}
-          </div>
-        </div>
-      </div>
-    </Link>
   );
 }
