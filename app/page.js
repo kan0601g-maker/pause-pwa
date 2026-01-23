@@ -37,41 +37,51 @@ const HUB_ITEMS = [
 export default function HomePage() {
   return (
     <main className="min-h-dvh bg-zinc-50 text-zinc-900">
-      <div className="mx-auto w-full max-w-3xl px-4 py-10">
+      {/* ★中央寄せの“箱”：左寄り問題の本丸 */}
+      <div className="mx-auto w-full max-w-3xl px-6 py-12">
         {/* Header */}
-        <header className="mb-6">
+        <header className="mb-8">
           <div className="text-sm text-zinc-500">nuru market</div>
-          <h1 className="mt-1 text-2xl font-semibold">HOME（入口・ハブ）</h1>
-          <p className="mt-2 text-sm leading-relaxed text-zinc-600">
+
+          <h1 className="mt-2 text-3xl font-bold tracking-tight">
+            HOME（入口・ハブ）
+          </h1>
+
+          <p className="mt-3 text-sm leading-relaxed text-zinc-600">
             ここは入口です。下の部屋を選んで移動してください。
-            <span className="ml-2 text-zinc-500">
-              ※STAR LEAF は演出専用で、HOMEではありません。
+            <br />
+            <span className="text-zinc-500">
+              ※ STAR LEAF は演出専用で、HOMEではありません。
             </span>
           </p>
         </header>
 
         {/* Hub cards */}
-        <section className="grid gap-3 sm:grid-cols-2">
+        <section className="grid gap-4 sm:grid-cols-2">
           {HUB_ITEMS.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="group rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow"
+              className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition
+                         hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow"
             >
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 text-lg">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-lg">
                   {item.icon}
                 </div>
+
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <div className="truncate text-base font-medium">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="truncate text-base font-semibold">
                       {item.title}
                     </div>
                     <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600">
                       {item.href}
                     </span>
                   </div>
+
                   <p className="mt-1 text-sm text-zinc-600">{item.subtitle}</p>
+
                   <div className="mt-3 text-sm text-zinc-500 transition group-hover:text-zinc-800">
                     開く →
                   </div>
@@ -82,8 +92,8 @@ export default function HomePage() {
         </section>
 
         {/* Footer note */}
-        <footer className="mt-8 rounded-2xl border border-zinc-200 bg-white p-4 text-sm text-zinc-600">
-          <div className="font-medium text-zinc-800">運用ルール</div>
+        <footer className="mt-10 rounded-2xl border border-zinc-200 bg-white p-5 text-sm text-zinc-600">
+          <div className="font-semibold text-zinc-800">運用ルール</div>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             <li>HOME（/）はリンク集だけ（演出・stateは持たせない）</li>
             <li>演出は rooms 配下（/rooms/starleaf など）で自己完結</li>
