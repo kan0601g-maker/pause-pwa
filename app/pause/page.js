@@ -11,23 +11,40 @@ export default function PausePage() {
         padding: "48px 24px",
       }}
     >
-      <div style={{ maxWidth: 720, margin: "0 auto" }}>
-        <h1 style={{ fontSize: 28, fontWeight: 900 }}>💤 pause</h1>
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
+        <div
+          style={{
+            display: "inline-block",
+            fontSize: 12,
+            color: "#666",
+            background: "#fff",
+            border: "1px solid #ddd",
+            borderRadius: 999,
+            padding: "6px 10px",
+          }}
+        >
+          PAUSE_ROUTE_OK
+        </div>
 
-        <p style={{ marginTop: 12, fontSize: 14, lineHeight: 1.8 }}>
-          ここは休憩ページです。<br />
+        <h1 style={{ marginTop: 14, fontSize: 30, fontWeight: 900 }}>
+          💤 pause
+        </h1>
+
+        <p style={{ marginTop: 10, fontSize: 14, lineHeight: 1.9, color: "#444" }}>
+          ここは休憩ページ。<br />
           何もしなくていい場所。
         </p>
 
-        <div style={{ marginTop: 24 }}>
+        <div style={{ marginTop: 22 }}>
           <Link
             href="/"
             style={{
               textDecoration: "none",
               color: "#111",
-              border: "1px solid #ccc",
-              padding: "8px 12px",
+              background: "#fff",
+              border: "1px solid #ddd",
               borderRadius: 999,
+              padding: "10px 14px",
               fontSize: 14,
             }}
           >
