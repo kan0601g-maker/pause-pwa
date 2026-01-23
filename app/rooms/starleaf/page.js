@@ -15,7 +15,6 @@ export default function StarleafPage() {
         padding: "56px 16px 64px",
       }}
     >
-      {/* 固定：HOMEへ戻る */}
       <div style={{ position: "fixed", top: 12, left: 12, zIndex: 9999 }}>
         <Link
           href="/"
