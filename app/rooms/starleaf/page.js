@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 
 export default function StarleafPage() {
   const BUILD_TAG = "STARLEAF_ROUTE_BUILD_20260123_BTN_AND_CRAWL";
+    const IS_NOT_HOME_NOTE = "ここは演出・世界観（STAR LEAF）です。HOMEではありません。";
+
 
   // idle -> opening -> scanning -> ready
   const [phase, setPhase] = useState("idle");
