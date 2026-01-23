@@ -1,106 +1,138 @@
 // app/page.js
 import Link from "next/link";
 
-const HUB_ITEMS = [
-  {
-    href: "/pause",
-    title: "pause",
-    subtitle: "休憩・呼吸を整える",
-    icon: "💤",
-  },
-  {
-    href: "/rooms/starleaf",
-    title: "STAR LEAF",
-    subtitle: "演出・世界観（別ページ）",
-    icon: "🍃",
-  },
-  {
-    href: "/my-room",
-    title: "my-room",
-    subtitle: "個室（作業・整理）",
-    icon: "🏠",
-  },
-  {
-    href: "/rooms/echo",
-    title: "echo",
-    subtitle: "雑談・ログ",
-    icon: "💬",
-  },
-  {
-    href: "/board",
-    title: "board",
-    subtitle: "掲示・共有",
-    icon: "📌",
-  },
-];
-
 export default function HomePage() {
   return (
-    <main className="min-h-dvh bg-zinc-50 text-zinc-900">
-      {/* ★中央寄せの“箱”：左寄り問題の本丸 */}
-      <div className="mx-auto w-full max-w-3xl px-6 py-12">
-        {/* Header */}
-        <header className="mb-8">
-          <div className="text-sm text-zinc-500">nuru market</div>
+    <main
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#fafafa",
+        color: "#111",
+      }}
+    >
+      {/* 中央カラム（これが効いてないと全部ダメ） */}
+      <div
+        style={{
+          maxWidth: "720px",
+          margin: "0 auto",
+          padding: "48px 24px",
+        }}
+      >
+        {/* ヘッダー */}
+        <header style={{ marginBottom: "32px" }}>
+          <div style={{ fontSize: "14px", color: "#666" }}>
+            nuru market
+          </div>
 
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
+          <h1
+            style={{
+              marginTop: "8px",
+              fontSize: "28px",
+              fontWeight: "bold",
+            }}
+          >
             HOME（入口・ハブ）
           </h1>
 
-          <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-            ここは入口です。下の部屋を選んで移動してください。
-            <br />
-            <span className="text-zinc-500">
-              ※ STAR LEAF は演出専用で、HOMEではありません。
-            </span>
+          <p
+            style={{
+              marginTop: "12px",
+              fontSize: "14px",
+              lineHeight: "1.7",
+              color: "#444",
+            }}
+          >
+            ここは入口です。下の部屋を選んで移動してください。<br />
+            ※ STAR LEAF は演出専用で、HOMEではありません。
           </p>
         </header>
 
-        {/* Hub cards */}
-        <section className="grid gap-4 sm:grid-cols-2">
-          {HUB_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="group rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition
-                         hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow"
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-zinc-100 text-lg">
-                  {item.icon}
-                </div>
-
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="truncate text-base font-semibold">
-                      {item.title}
-                    </div>
-                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600">
-                      {item.href}
-                    </span>
-                  </div>
-
-                  <p className="mt-1 text-sm text-zinc-600">{item.subtitle}</p>
-
-                  <div className="mt-3 text-sm text-zinc-500 transition group-hover:text-zinc-800">
-                    開く →
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
+        {/* リンク一覧 */}
+        <section style={{ display: "grid", gap: "16px" }}>
+          <HubItem
+            icon="💤"
+            title="pause"
+            href="/pause"
+            description="休憩・呼吸を整える"
+          />
+          <HubItem
+            icon="🍃"
+            title="STAR LEAF"
+            href="/rooms/starleaf"
+            description="演出・世界観（別ページ）"
+          />
+          <HubItem
+            icon="🏠"
+            title="my-room"
+            href="/my-room"
+            description="個室（作業・整理）"
+          />
+          <HubItem
+            icon="💬"
+            title="echo"
+            href="/rooms/echo"
+            description="雑談・ログ"
+          />
+          <HubItem
+            icon="📌"
+            title="board"
+            href="/board"
+            description="掲示・共有"
+          />
         </section>
 
-        {/* Footer note */}
-        <footer className="mt-10 rounded-2xl border border-zinc-200 bg-white p-5 text-sm text-zinc-600">
-          <div className="font-semibold text-zinc-800">運用ルール</div>
-          <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>HOME（/）はリンク集だけ（演出・stateは持たせない）</li>
-            <li>演出は rooms 配下（/rooms/starleaf など）で自己完結</li>
+        {/* フッター */}
+        <footer
+          style={{
+            marginTop: "40px",
+            padding: "16px",
+            backgroundColor: "#fff",
+            border: "1px solid #ddd",
+            borderRadius: "12px",
+            fontSize: "14px",
+            color: "#444",
+          }}
+        >
+          <strong>運用ルール</strong>
+          <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
+            <li>HOME（/）はリンク集だけ</li>
+            <li>演出は rooms 配下で自己完結</li>
             <li>迷ったら必ず HOME に戻る</li>
           </ul>
         </footer>
       </div>
     </main>
+  );
+}
+
+/* ===== 部品 ===== */
+
+function HubItem({ icon, title, href, description }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        display: "block",
+        textDecoration: "none",
+        color: "#111",
+        backgroundColor: "#fff",
+        border: "1px solid #ddd",
+        borderRadius: "14px",
+        padding: "16px",
+      }}
+    >
+      <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+        <div style={{ fontSize: "24px" }}>{icon}</div>
+        <div>
+          <div style={{ fontWeight: "bold" }}>{title}</div>
+          <div style={{ fontSize: "14px", color: "#555" }}>
+            {description}
+          </div>
+          <div style={{ fontSize: "13px", color: "#888", marginTop: "4px" }}>
+            {href}
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }
