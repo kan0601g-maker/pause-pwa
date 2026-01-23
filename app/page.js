@@ -1,161 +1,96 @@
 // app/page.js
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
 
-export default function Page() {
-  const BUILD_TAG = "HOME_ONLY_BUILD_20260123";
+const HUB_ITEMS = [
+  {
+    href: "/pause",
+    title: "pause",
+    subtitle: "休憩・呼吸を整える",
+    icon: "💤",
+  },
+  {
+    href: "/rooms/starleaf",
+    title: "STAR LEAF",
+    subtitle: "演出・世界観（別ページ）",
+    icon: "🍃",
+  },
+  {
+    href: "/my-room",
+    title: "my-room",
+    subtitle: "個室（作業・整理）",
+    icon: "🏠",
+  },
+  {
+    href: "/rooms/echo",
+    title: "echo",
+    subtitle: "雑談・ログ",
+    icon: "💬",
+  },
+  {
+    href: "/board",
+    title: "board",
+    subtitle: "掲示・共有",
+    icon: "📌",
+  },
+];
 
-  // HOME内テーマ切替のみ（画面遷移はしない）
-  const [theme, setTheme] = useState("Nordic"); // Nordic | Spaceship
-
-  const bg =
-    theme === "Nordic"
-      ? {
-          background: "linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)",
-          color: "#0f172a",
-        }
-      : {
-          background:
-            "radial-gradient(1200px 600px at 20% 10%, rgba(140,180,255,0.25) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, #0b1020 0%, #0a0f1a 55%, #0d1424 100%)",
-          color: "#e6eefc",
-        };
-
-  const panel = {
-    width: "100%",
-    maxWidth: 560,
-    margin: "0 auto",
-    borderRadius: 18,
-    padding: 16,
-    boxSizing: "border-box",
-    border:
-      theme === "Nordic"
-        ? "1px solid rgba(0,0,0,0.1)"
-        : "1px solid rgba(255,255,255,0.15)",
-    background:
-      theme === "Nordic"
-        ? "rgba(255,255,255,0.9)"
-        : "rgba(12, 18, 36, 0.75)",
-    boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-    backdropFilter: "blur(10px)",
-  };
-
-  const btn = (variant = "solid") => {
-    const base = {
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: "100%",
-      padding: "14px",
-      borderRadius: 14,
-      fontWeight: 800,
-      textDecoration: "none",
-      cursor: "pointer",
-      border: "2px solid",
-      boxSizing: "border-box",
-      userSelect: "none",
-    };
-
-    if (variant === "ghost") {
-      return {
-        ...base,
-        background: "transparent",
-        borderColor:
-          theme === "Nordic" ? "#0f172a" : "rgba(230,238,252,0.4)",
-        color: theme === "Nordic" ? "#0f172a" : "#e6eefc",
-      };
-    }
-
-    return {
-      ...base,
-      background: theme === "Nordic" ? "#0f172a" : "rgba(230,238,252,0.2)",
-      borderColor:
-        theme === "Nordic" ? "#0f172a" : "rgba(230,238,252,0.4)",
-      color: theme === "Nordic" ? "#ffffff" : "#e6eefc",
-    };
-  };
-
+export default function HomePage() {
   return (
-    <main
-      style={{
-        minHeight: "100dvh",
-        padding: 18,
-        boxSizing: "border-box",
-        fontFamily:
-          'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial',
-        ...bg,
-      }}
-    >
-      <div style={{ maxWidth: 560, margin: "0 auto" }}>
-        {/* HEADER */}
-        <header style={{ textAlign: "center", marginBottom: 20 }}>
-          <div style={{ fontSize: 40 }}>👑</div>
-          <div style={{ fontSize: 20, fontWeight: 900 }}>nuru market</div>
-          <div style={{ fontSize: 10, opacity: 0.5 }}>{BUILD_TAG}</div>
-
-          {/* THEME */}
-          <div
-            style={{
-              marginTop: 14,
-              display: "flex",
-              gap: 8,
-              justifyContent: "center",
-            }}
-          >
-            <button
-              onClick={() => setTheme("Nordic")}
-              style={{
-                padding: "6px 12px",
-                borderRadius: 999,
-                border: "1px solid",
-                fontWeight: 700,
-                background: theme === "Nordic" ? "#000" : "transparent",
-                color: theme === "Nordic" ? "#fff" : "inherit",
-                cursor: "pointer",
-              }}
-            >
-              Nordic
-            </button>
-            <button
-              onClick={() => setTheme("Spaceship")}
-              style={{
-                padding: "6px 12px",
-                borderRadius: 999,
-                border: "1px solid",
-                fontWeight: 700,
-                background: theme === "Spaceship" ? "#fff" : "transparent",
-                color: theme === "Spaceship" ? "#000" : "inherit",
-                cursor: "pointer",
-              }}
-            >
-              Spaceship
-            </button>
-          </div>
+    <main className="min-h-dvh bg-zinc-50 text-zinc-900">
+      <div className="mx-auto w-full max-w-3xl px-4 py-10">
+        {/* Header */}
+        <header className="mb-6">
+          <div className="text-sm text-zinc-500">nuru market</div>
+          <h1 className="mt-1 text-2xl font-semibold">HOME（入口・ハブ）</h1>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-600">
+            ここは入口です。下の部屋を選んで移動してください。
+            <span className="ml-2 text-zinc-500">
+              ※STAR LEAF は演出専用で、HOMEではありません。
+            </span>
+          </p>
         </header>
 
-        {/* MAIN PANEL */}
-        <section style={panel}>
-          <div style={{ display: "grid", gap: 14 }}>
-            <Link href="/my-room" style={btn()}>
-              🏠 MY ROOM
+        {/* Hub cards */}
+        <section className="grid gap-3 sm:grid-cols-2">
+          {HUB_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="group rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 text-lg">
+                  {item.icon}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <div className="truncate text-base font-medium">
+                      {item.title}
+                    </div>
+                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600">
+                      {item.href}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm text-zinc-600">{item.subtitle}</p>
+                  <div className="mt-3 text-sm text-zinc-500 transition group-hover:text-zinc-800">
+                    開く →
+                  </div>
+                </div>
+              </div>
             </Link>
-
-            <Link href="/pause" style={btn()}>
-              ☕ PAUSE
-            </Link>
-
-            <Link href="/rooms/starleaf" style={btn()}>
-              🌿 STAR LEAF
-            </Link>
-
-            <Link href="/board" style={btn("ghost")}>
-              🧾 BOARD
-            </Link>
-          </div>
+          ))}
         </section>
+
+        {/* Footer note */}
+        <footer className="mt-8 rounded-2xl border border-zinc-200 bg-white p-4 text-sm text-zinc-600">
+          <div className="font-medium text-zinc-800">運用ルール</div>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>HOME（/）はリンク集だけ（演出・stateは持たせない）</li>
+            <li>演出は rooms 配下（/rooms/starleaf など）で自己完結</li>
+            <li>迷ったら必ず HOME に戻る</li>
+          </ul>
+        </footer>
       </div>
     </main>
   );
-}
 }
