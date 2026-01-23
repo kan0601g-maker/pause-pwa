@@ -1,344 +1,229 @@
-// app/rooms/starleaf/page.js
 import Link from "next/link";
 
 export default function StarleafPage() {
   const BUILD_TAG = "STARLEAF_MIN_SAFE_UI_20260123";
 
-  return (
-    <main style={s.page}>
-      {/* うっすら背景（CSSのみ） */}
-      <div style={s.bgGlow} aria-hidden />
-      <div style={s.bgVignette} aria-hidden />
-
-      {/* 左上：HOMEへ戻る（固定） */}
-      <div style={s.topLeft}>
-        <Link href="/" style={s.backBtn}>
-          ← HOME（入口）へ戻る
-        </Link>
-      </div>
-
-      {/* 本文 */}
-      <div style={s.wrap}>
-        {/* 上部バナー：ここはHOMEじゃない */}
-        <div style={s.notice}>
-          <span style={s.noticeDot} />
-          <span>
-            ここは <b>演出・世界観</b>（スター・リーフ）です。HOMEではありません。
-          </span>
-          <span style={s.tag}>{BUILD_TAG}</span>
-        </div>
-
-        {/* タイトル */}
-        <header style={s.header}>
-          <div style={s.brand}>nuru market</div>
-
-          <div style={s.h1row}>
-            <span style={s.leafIcon} aria-hidden>
-              🍃
-            </span>
-            <h1 style={s.h1}>銀河戦記：スター・リーフ</h1>
-          </div>
-
-          <p style={s.lead}>
-            宿命の調律師（アーボリスト）たちの物語。
-            <br />
-            いまは <b>復旧優先の最小版</b>。演出は次で戻す。
-          </p>
-        </header>
-
-        {/* セクション：世界観サマリ（静的） */}
-        <section style={s.card}>
-          <div style={s.cardTitle}>世界観の軸</div>
-
-          <div style={s.grid}>
-            <div style={s.pill}>
-              <div style={s.pillTop}>広葉樹</div>
-              <div style={s.pillMain}>共生 / 循環 / 慈育</div>
-              <div style={s.pillSub}>多様性は、森の強さ。</div>
-            </div>
-
-            <div style={s.pill}>
-              <div style={s.pillTop}>黒杉</div>
-              <div style={s.pillMain}>規律 / 直線 / 縫い止め</div>
-              <div style={s.pillSub}>単一栽培は、冷たい秩序。</div>
-            </div>
-          </div>
-
-          <div style={s.hr} />
-
-          <div style={s.small}>
-            ※ このページは「世界観の入口」。戦闘やスキャン演出は
-            <b> Client化して別ファイルへ隔離</b>して戻す（安全運用）。
-          </div>
-        </section>
-
-        {/* ルート案内（誤認防止） */}
-        <section style={s.card}>
-          <div style={s.cardTitle}>ルート案内</div>
-
-          <div style={s.routes}>
-            <RouteRow label="入口・ハブ" href="/" />
-            <RouteRow label="休憩" href="/pause" />
-            <RouteRow label="雑談" href="/rooms/echo" />
-            <RouteRow label="個室" href="/my-room" />
-            <RouteRow label="掲示" href="/board" />
-          </div>
-
-          <div style={s.hint}>
-            迷ったら <b>HOME（入口）</b> に戻る。
-          </div>
-        </section>
-
-        {/* 下部：次の復帰方針（静的） */}
-        <footer style={s.footer}>
-          <div style={s.footerTitle}>次の復帰（安全ロードマップ）</div>
-          <ol style={s.ol}>
-            <li>CSSだけで雰囲気を整える（今ここ）</li>
-            <li>演出・音・スキャンは Client Component に隔離して追加</li>
-            <li>“慈育”の庭（整枝）と、共鳴フィールドへ拡張</li>
-          </ol>
-        </footer>
-      </div>
-    </main>
-  );
-}
-
-function RouteRow({ label, href }) {
-  return (
-    <div style={r.row}>
-      <div style={r.left}>
-        <div style={r.label}>{label}</div>
-        <div style={r.path}>{href}</div>
-      </div>
-      <Link href={href} style={r.go}>
-        開く →
-      </Link>
-    </div>
-  );
-}
-
-/* ---------------- styles (CSS-in-JS / no events) ---------------- */
-
-const s = {
-  page: {
+  const page = {
     minHeight: "100vh",
-    background: "#070b08",
+    background:
+      "radial-gradient(900px 520px at 12% 8%, rgba(80,255,160,0.12), transparent 65%), #060a08",
     color: "#d9ffe6",
-    padding: "44px 20px",
-    position: "relative",
-    overflow: "hidden",
+    padding: "28px 18px 64px",
     fontFamily:
       'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif',
-  },
-  bgGlow: {
-    position: "absolute",
-    inset: -200,
-    background:
-      "radial-gradient(circle at 30% 20%, rgba(60, 255, 150, 0.18), transparent 45%), radial-gradient(circle at 70% 60%, rgba(80, 200, 255, 0.10), transparent 55%)",
-    filter: "blur(18px)",
-    pointerEvents: "none",
-  },
-  bgVignette: {
-    position: "absolute",
-    inset: 0,
-    background:
-      "radial-gradient(circle at 50% 30%, transparent 0%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0.82) 100%)",
-    pointerEvents: "none",
-  },
-  topLeft: {
-    position: "fixed",
-    top: 14,
-    left: 14,
-    zIndex: 10,
-  },
-  backBtn: {
-    display: "inline-block",
-    padding: "10px 12px",
-    borderRadius: 999,
-    border: "1px solid rgba(120, 255, 180, 0.32)",
-    background: "rgba(0,0,0,0.35)",
-    color: "#b9ffd6",
-    textDecoration: "none",
-    fontSize: 13,
-    letterSpacing: 0.2,
-    backdropFilter: "blur(6px)",
-  },
-  wrap: {
-    position: "relative",
-    maxWidth: 920,
-    margin: "0 auto",
-  },
-  notice: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 10,
-    alignItems: "center",
-    border: "1px solid rgba(120, 255, 180, 0.26)",
-    background: "rgba(0,0,0,0.25)",
-    borderRadius: 14,
-    padding: "12px 14px",
-    color: "#b9ffd6",
-    fontSize: 13,
-    marginBottom: 22,
-    backdropFilter: "blur(6px)",
-  },
-  noticeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 99,
-    background: "rgba(120, 255, 180, 0.95)",
-    boxShadow: "0 0 18px rgba(120,255,180,0.45)",
-  },
-  tag: {
-    marginLeft: "auto",
-    fontSize: 12,
-    opacity: 0.75,
-    border: "1px solid rgba(120,255,180,0.20)",
-    padding: "4px 8px",
-    borderRadius: 999,
-    whiteSpace: "nowrap",
-  },
-  header: {
-    marginBottom: 18,
-  },
-  brand: {
-    fontSize: 14,
-    color: "rgba(210,255,230,0.70)",
-    letterSpacing: 0.6,
-    marginBottom: 8,
-  },
-  h1row: {
-    display: "flex",
-    gap: 10,
-    alignItems: "center",
-  },
-  leafIcon: {
-    fontSize: 26,
-    filter: "drop-shadow(0 0 14px rgba(120,255,180,0.25))",
-  },
-  h1: {
-    margin: 0,
-    fontSize: 34,
-    fontWeight: 900,
-    letterSpacing: 0.4,
-    color: "#d9ffe6",
-    textShadow: "0 0 20px rgba(120,255,180,0.12)",
-  },
-  lead: {
-    marginTop: 10,
-    marginBottom: 0,
-    lineHeight: 1.8,
-    color: "rgba(210,255,230,0.78)",
-    fontSize: 14,
-  },
-  card: {
-    border: "1px solid rgba(120, 255, 180, 0.22)",
-    background: "rgba(0,0,0,0.28)",
-    borderRadius: 18,
-    padding: "16px 16px",
-    marginTop: 14,
-    backdropFilter: "blur(8px)",
-  },
-  cardTitle: {
-    fontWeight: 900,
-    letterSpacing: 0.3,
-    marginBottom: 12,
-    color: "#d9ffe6",
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: 12,
-  },
-  pill: {
-    border: "1px solid rgba(120,255,180,0.18)",
-    background: "rgba(0,0,0,0.22)",
-    borderRadius: 14,
-    padding: 14,
-  },
-  pillTop: {
-    fontSize: 12,
-    opacity: 0.78,
-    marginBottom: 6,
-  },
-  pillMain: {
-    fontWeight: 900,
-    marginBottom: 6,
-  },
-  pillSub: {
-    fontSize: 13,
-    opacity: 0.78,
-    lineHeight: 1.6,
-  },
-  hr: {
-    height: 1,
-    background: "rgba(120,255,180,0.18)",
-    margin: "14px 0",
-  },
-  small: {
-    fontSize: 13,
-    lineHeight: 1.75,
-    opacity: 0.82,
-  },
-  routes: {
-    display: "grid",
-    gap: 10,
-  },
-  hint: {
-    marginTop: 12,
-    fontSize: 13,
-    opacity: 0.85,
-  },
-  footer: {
-    marginTop: 18,
-    border: "1px solid rgba(120,255,180,0.18)",
-    background: "rgba(0,0,0,0.20)",
-    borderRadius: 18,
-    padding: 16,
-  },
-  footerTitle: {
-    fontWeight: 900,
-    marginBottom: 10,
-  },
-  ol: {
-    margin: 0,
-    paddingLeft: 18,
-    lineHeight: 1.85,
-    fontSize: 13,
-    opacity: 0.85,
-  },
-};
+  };
 
-const r = {
-  row: {
+  const wrap = { maxWidth: 980, margin: "0 auto" };
+
+  const topBar = {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
-    padding: "12px 12px",
-    borderRadius: 14,
+    padding: "10px 12px",
+    borderRadius: 999,
+    border: "1px solid rgba(120,255,180,0.22)",
+    background: "rgba(0,0,0,0.25)",
+    boxShadow: "0 0 0 1px rgba(0,0,0,0.35) inset",
+  };
+
+  const tag = {
+    fontSize: 12,
+    padding: "6px 10px",
+    borderRadius: 999,
     border: "1px solid rgba(120,255,180,0.18)",
     background: "rgba(0,0,0,0.18)",
-  },
-  left: {
-    display: "grid",
-    gap: 2,
-  },
-  label: {
-    fontWeight: 900,
-  },
-  path: {
-    fontSize: 12,
-    opacity: 0.78,
-  },
-  go: {
-    textDecoration: "none",
-    color: "#b9ffd6",
-    border: "1px solid rgba(120,255,180,0.26)",
-    padding: "8px 10px",
-    borderRadius: 999,
-    fontSize: 13,
-    background: "rgba(0,0,0,0.18)",
+    opacity: 0.9,
     whiteSpace: "nowrap",
-  },
-};
+  };
+
+  const h1 = { margin: "10px 0 0", fontSize: 28, fontWeight: 900, letterSpacing: 0.2 };
+  const lead = { margin: "6px 0 0", fontSize: 13, opacity: 0.86, lineHeight: 1.7 };
+
+  const card = {
+    marginTop: 16,
+    borderRadius: 18,
+    border: "1px solid rgba(120,255,180,0.20)",
+    background: "rgba(0,0,0,0.28)",
+    padding: 16,
+    boxShadow: "0 0 0 1px rgba(0,0,0,0.30) inset, 0 18px 60px rgba(0,0,0,0.45)",
+  };
+
+  const sectionTitle = { fontSize: 13, fontWeight: 900, margin: "0 0 10px" };
+
+  const grid2 = {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 12,
+  };
+
+  const miniCard = {
+    borderRadius: 14,
+    border: "1px solid rgba(120,255,180,0.16)",
+    background: "rgba(0,0,0,0.18)",
+    padding: 12,
+  };
+
+  // ---- ルート案内（行）共通 ----
+  const row = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    padding: "12px 12px",
+    borderRadius: 14,
+    border: "1px solid rgba(120,255,180,0.16)",
+    background: "rgba(0,0,0,0.18)",
+  };
+
+  const rowTitle = { fontSize: 14, fontWeight: 900, lineHeight: 1.2 };
+  const rowSub = { fontSize: 12, opacity: 0.75, marginTop: 4 };
+
+  const goBtn = {
+    display: "inline-block",
+    padding: "8px 12px",
+    borderRadius: 999,
+    border: "1px solid rgba(120,255,180,0.28)",
+    background: "rgba(0,0,0,0.22)",
+    color: "#b9ffd6",
+    textDecoration: "none",
+    fontSize: 13,
+    whiteSpace: "nowrap",
+  };
+
+  const note = { fontSize: 12, opacity: 0.7, lineHeight: 1.7 };
+
+  return (
+    <main style={page}>
+      <div style={wrap}>
+        {/* 上部固定メッセージ */}
+        <div style={topBar}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+            <span style={{ width: 8, height: 8, borderRadius: 99, background: "#4dff9f" }} />
+            <div style={{ fontSize: 12, opacity: 0.9, overflow: "hidden", textOverflow: "ellipsis" }}>
+              ここは演出・世界観（スター・リーフ）です。HOMEではありません。
+            </div>
+          </div>
+          <div style={tag}>{BUILD_TAG}</div>
+        </div>
+
+        <div style={{ marginTop: 12, opacity: 0.85, fontSize: 13 }}>nuru market</div>
+
+        <h1 style={h1}>🍃 銀河戦記：スター・リーフ</h1>
+        <p style={lead}>
+          宿命の調律師（アーボリスト）たちの物語。<br />
+          いまは復旧優先の最小版。演出は次で戻す。
+        </p>
+
+        {/* 世界観の軸 */}
+        <section style={card}>
+          <div style={sectionTitle}>世界観の軸</div>
+
+          <div style={grid2}>
+            <div style={miniCard}>
+              <div style={{ fontSize: 12, opacity: 0.75 }}>広葉樹</div>
+              <div style={{ fontSize: 14, fontWeight: 900, marginTop: 6 }}>共生 / 循環 / 慈育</div>
+              <div style={{ ...note, marginTop: 6 }}>多様性は、森の強さ。</div>
+            </div>
+
+            <div style={miniCard}>
+              <div style={{ fontSize: 12, opacity: 0.75 }}>針杉</div>
+              <div style={{ fontSize: 14, fontWeight: 900, marginTop: 6 }}>規律 / 直線 / 縫い止め</div>
+              <div style={{ ...note, marginTop: 6 }}>単一栽培は、冷たい秩序。</div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 12, ...note }}>
+            ※ このページは「世界観の入口」。戦闘やスキャン演出は Client 化して別ファイルに戻す（安全運用）。
+          </div>
+        </section>
+
+        {/* ルート案内 */}
+        <section style={card}>
+          <div style={sectionTitle}>ルート案内</div>
+
+          <div style={{ display: "grid", gap: 10 }}>
+            {/* 入口 */}
+            <div style={row}>
+              <div>
+                <div style={rowTitle}>入口・ハブ</div>
+                <div style={rowSub}>/</div>
+              </div>
+              <Link href="/" style={goBtn}>
+                開く →
+              </Link>
+            </div>
+
+            {/* 休憩 */}
+            <div style={row}>
+              <div>
+                <div style={rowTitle}>休憩</div>
+                <div style={rowSub}>/pause</div>
+              </div>
+              <Link href="/pause" style={goBtn}>
+                開く →
+              </Link>
+            </div>
+
+            {/* 雑談 */}
+            <div style={row}>
+              <div>
+                <div style={rowTitle}>雑談</div>
+                <div style={rowSub}>/rooms/echo</div>
+              </div>
+              <Link href="/rooms/echo" style={goBtn}>
+                開く →
+              </Link>
+            </div>
+
+            {/* 個室 */}
+            <div style={row}>
+              <div>
+                <div style={rowTitle}>個室</div>
+                <div style={rowSub}>/my-room</div>
+              </div>
+              <Link href="/my-room" style={goBtn}>
+                開く →
+              </Link>
+            </div>
+
+            {/* 掲示 */}
+            <div style={row}>
+              <div>
+                <div style={rowTitle}>掲示</div>
+                <div style={rowSub}>/board</div>
+              </div>
+              <Link href="/board" style={goBtn}>
+                開く →
+              </Link>
+            </div>
+
+            {/* ★追加：戦闘（タクティクス） */}
+            <div style={row}>
+              <div>
+                <div style={rowTitle}>共鳴フィールド・タクティクス</div>
+                <div style={rowSub}>/rooms/starleaf/tactics</div>
+              </div>
+
+              <Link href="/rooms/starleaf/tactics" style={goBtn}>
+                ▶ 戦闘開始
+              </Link>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 12, ...note }}>迷ったら HOME（入口）に戻る。</div>
+        </section>
+
+        {/* 次の復帰 */}
+        <section style={card}>
+          <div style={sectionTitle}>次の復帰（安全ロードマップ）</div>
+          <ol style={{ margin: "0 0 0 18px", padding: 0, lineHeight: 1.8, fontSize: 13, opacity: 0.9 }}>
+            <li>CSSだけで雰囲気を整える（今ここ）</li>
+            <li>演出・電子文字列は Client Component に分離して追加</li>
+            <li>“慈育”の庭（整枝）と、共鳴フィールド拡張</li>
+          </ol>
+        </section>
+      </div>
+    </main>
+  );
+}
