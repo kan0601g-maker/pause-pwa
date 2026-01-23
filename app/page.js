@@ -168,6 +168,8 @@ export default function StarleafPage() {
       justifyContent: "center",
       gap: 8,
       width: "100%",
+      maxWidth: "100%",
+      minWidth: 0,
       padding: "14px 14px",
       borderRadius: 14,
       fontWeight: 800,
@@ -175,6 +177,7 @@ export default function StarleafPage() {
       cursor: "pointer",
       border: "2px solid",
       userSelect: "none",
+      boxSizing: "border-box", // ★重要：border込みで100%にする（はみ出し防止）
     };
 
     if (variant === "ghost") {
@@ -235,6 +238,7 @@ export default function StarleafPage() {
                 🎮 ゲーム開始
               </button>
 
+              {/* HOUSEへ戻る（ルートトップ） */}
               <Link href="/" style={btn("ghost")}>
                 🏠 ヌルマーケット（HOUSE）へ戻る
               </Link>
@@ -249,6 +253,7 @@ export default function StarleafPage() {
                   overflow: "hidden",
                   borderRadius: 16,
                   border: "2px solid rgba(154, 245, 154, 0.65)",
+                  boxSizing: "border-box",
                 }}
               >
                 <div
@@ -260,6 +265,7 @@ export default function StarleafPage() {
                     color: "#F6D34A",
                     padding: 22,
                     animation: `crawlUp ${OPENING_MS}ms linear forwards`,
+                    boxSizing: "border-box",
                   }}
                 >
                   <div
@@ -291,6 +297,7 @@ export default function StarleafPage() {
                     padding: "7px 12px",
                     fontWeight: 800,
                     cursor: "pointer",
+                    boxSizing: "border-box",
                   }}
                 >
                   SKIP
