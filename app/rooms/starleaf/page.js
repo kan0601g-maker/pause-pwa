@@ -1,4 +1,3 @@
-// app/rooms/starleaf/page.js
 "use client";
 
 import Link from "next/link";
@@ -150,7 +149,7 @@ export default function StarleafPage() {
   };
 
   const panel = {
-    width: "100%",
+    width: "100%",              // ✅ 念のため固定
     maxWidth: 720,
     margin: "0 auto",
     borderRadius: 18,
@@ -170,7 +169,7 @@ export default function StarleafPage() {
       justifyContent: "center",
       gap: 8,
       width: "100%",
-      boxSizing: "border-box", // ←はみ出し対策の本体
+      boxSizing: "border-box",   // ✅ はみ出し対策の本丸
       padding: "14px 14px",
       borderRadius: 14,
       fontWeight: 800,
@@ -213,15 +212,21 @@ export default function StarleafPage() {
       <div style={{ width: "100%", maxWidth: 760, margin: "0 auto" }}>
         <header style={{ textAlign: "center", marginBottom: 18 }}>
           <div style={{ fontSize: 40 }}>👑</div>
-          <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: 0.4 }}>nuru market</div>
-          <div style={{ fontSize: 10, opacity: 0.55, marginTop: 6 }}>{BUILD_TAG}</div>
+          <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: 0.4 }}>
+            nuru market
+          </div>
+          <div style={{ fontSize: 10, opacity: 0.55, marginTop: 6 }}>
+            {BUILD_TAG}
+          </div>
         </header>
 
         <section style={panel}>
           <div style={{ display: "grid", gap: 14 }}>
             <div style={{ display: "grid", gap: 6 }}>
               <div style={{ fontWeight: 900, fontSize: 18 }}>🌿 STAR LEAF</div>
-              <div style={{ fontSize: 12, opacity: 0.85 }}>黒背景・緑文字。ここは演出画面。</div>
+              <div style={{ fontSize: 12, opacity: 0.85 }}>
+                黒背景・緑文字。ここは演出画面。
+              </div>
             </div>
 
             {/* ここは常に出る */}
@@ -234,7 +239,7 @@ export default function StarleafPage() {
                 🎮 ゲーム開始
               </button>
 
-              {/* ★戻れない対策：hrefは "/"（HOME）固定。必要なら "?view=HOUSE" に変えてOK */}
+              {/* ここは / に戻す（HOME側がHOUSE表示になってないなら app/page.js が原因） */}
               <Link href="/" style={btn("ghost")}>
                 🏠 ヌルマーケット（HOUSE）へ戻る
               </Link>
@@ -259,11 +264,17 @@ export default function StarleafPage() {
                     textAlign: "center",
                     color: "#F6D34A",
                     padding: 22,
-                    animation: `crawlUp ${OPENING_MS}ms linear forwards`,
                     boxSizing: "border-box",
+                    animation: `crawlUp ${OPENING_MS}ms linear forwards`,
                   }}
                 >
-                  <div style={{ fontSize: 20, fontWeight: 900, letterSpacing: 0.6 }}>
+                  <div
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 900,
+                      letterSpacing: 0.6,
+                    }}
+                  >
                     EPISODE / NEW BREATH
                   </div>
                   <div style={{ marginTop: 18, fontSize: 14, lineHeight: 1.75 }}>
@@ -294,7 +305,9 @@ export default function StarleafPage() {
             )}
 
             {phase === "scanning" && (
-              <div style={{ textAlign: "center", padding: "18px 10px" }}>📡 SCANNING...</div>
+              <div style={{ textAlign: "center", padding: "18px 10px" }}>
+                📡 SCANNING...
+              </div>
             )}
 
             {phase === "ready" && (
