@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export default function StarleafPage() {
-  const BUILD_TAG = "STARLEAF_MIN_SAFE_UI_20260123";
+  const BUILD_TAG = "STARLEAF_WORLD_UI_20260123_GAMESTART";
 
   const page = {
     minHeight: "100vh",
@@ -64,7 +64,42 @@ export default function StarleafPage() {
     padding: 12,
   };
 
-  // ---- ルート案内（行）共通 ----
+  const note = { fontSize: 12, opacity: 0.72, lineHeight: 1.7 };
+
+  const btnPrimary = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    width: "100%",
+    padding: "16px 18px",
+    borderRadius: 16,
+    border: "1px solid rgba(120,255,180,0.30)",
+    background:
+      "linear-gradient(180deg, rgba(40,255,140,0.18), rgba(0,0,0,0.18))",
+    color: "#dbffe9",
+    textDecoration: "none",
+    fontSize: 16,
+    fontWeight: 900,
+    letterSpacing: 0.2,
+    boxShadow:
+      "0 0 0 1px rgba(0,0,0,0.35) inset, 0 20px 70px rgba(0,0,0,0.45)",
+  };
+
+  const btnGhost = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "10px 12px",
+    borderRadius: 999,
+    border: "1px solid rgba(120,255,180,0.22)",
+    background: "rgba(0,0,0,0.22)",
+    color: "#b9ffd6",
+    textDecoration: "none",
+    fontSize: 13,
+    whiteSpace: "nowrap",
+  };
+
   const row = {
     display: "flex",
     alignItems: "center",
@@ -79,24 +114,10 @@ export default function StarleafPage() {
   const rowTitle = { fontSize: 14, fontWeight: 900, lineHeight: 1.2 };
   const rowSub = { fontSize: 12, opacity: 0.75, marginTop: 4 };
 
-  const goBtn = {
-    display: "inline-block",
-    padding: "8px 12px",
-    borderRadius: 999,
-    border: "1px solid rgba(120,255,180,0.28)",
-    background: "rgba(0,0,0,0.22)",
-    color: "#b9ffd6",
-    textDecoration: "none",
-    fontSize: 13,
-    whiteSpace: "nowrap",
-  };
-
-  const note = { fontSize: 12, opacity: 0.7, lineHeight: 1.7 };
-
   return (
     <main style={page}>
       <div style={wrap}>
-        {/* 上部固定メッセージ */}
+        {/* 上部バー */}
         <div style={topBar}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
             <span style={{ width: 8, height: 8, borderRadius: 99, background: "#4dff9f" }} />
@@ -112,8 +133,27 @@ export default function StarleafPage() {
         <h1 style={h1}>🍃 銀河戦記：スター・リーフ</h1>
         <p style={lead}>
           宿命の調律師（アーボリスト）たちの物語。<br />
-          いまは復旧優先の最小版。演出は次で戻す。
+          いまは復旧優先の最小版。まずは戦場へ。
         </p>
+
+        {/* ★ゲーム開始（最優先） */}
+        <section style={card}>
+          <div style={{ display: "grid", gap: 10 }}>
+            <Link href="/rooms/starleaf/tactics" style={btnPrimary}>
+              ▶ GAME START（共鳴フィールド・タクティクス）
+            </Link>
+
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+              <div style={{ ...note, margin: 0 }}>
+                14×14 / 味方3 / 敵4 / 勝利条件：戦意喪失 or 全滅 / 戦利品あり
+              </div>
+
+              <Link href="/" style={btnGhost}>
+                ← HOME（入口）へ
+              </Link>
+            </div>
+          </div>
+        </section>
 
         {/* 世界観の軸 */}
         <section style={card}>
@@ -134,94 +174,37 @@ export default function StarleafPage() {
           </div>
 
           <div style={{ marginTop: 12, ...note }}>
-            ※ このページは「世界観の入口」。戦闘やスキャン演出は Client 化して別ファイルに戻す（安全運用）。
+            ※ このページは「世界観＋開始ボタン」だけ。生活導線（休憩/個室）は HOME 側に集約する。
           </div>
         </section>
 
-        {/* ルート案内 */}
+        {/* 最低限の案内（休憩/個室は消す） */}
         <section style={card}>
-          <div style={sectionTitle}>ルート案内</div>
+          <div style={sectionTitle}>最低限の案内</div>
 
           <div style={{ display: "grid", gap: 10 }}>
-            {/* 入口 */}
-            <div style={row}>
-              <div>
-                <div style={rowTitle}>入口・ハブ</div>
-                <div style={rowSub}>/</div>
-              </div>
-              <Link href="/" style={goBtn}>
-                開く →
-              </Link>
-            </div>
-
-            {/* 休憩 */}
-            <div style={row}>
-              <div>
-                <div style={rowTitle}>休憩</div>
-                <div style={rowSub}>/pause</div>
-              </div>
-              <Link href="/pause" style={goBtn}>
-                開く →
-              </Link>
-            </div>
-
-            {/* 雑談 */}
             <div style={row}>
               <div>
                 <div style={rowTitle}>雑談</div>
                 <div style={rowSub}>/rooms/echo</div>
               </div>
-              <Link href="/rooms/echo" style={goBtn}>
+              <Link href="/rooms/echo" style={btnGhost}>
                 開く →
               </Link>
             </div>
 
-            {/* 個室 */}
-            <div style={row}>
-              <div>
-                <div style={rowTitle}>個室</div>
-                <div style={rowSub}>/my-room</div>
-              </div>
-              <Link href="/my-room" style={goBtn}>
-                開く →
-              </Link>
-            </div>
-
-            {/* 掲示 */}
             <div style={row}>
               <div>
                 <div style={rowTitle}>掲示</div>
                 <div style={rowSub}>/board</div>
               </div>
-              <Link href="/board" style={goBtn}>
+              <Link href="/board" style={btnGhost}>
                 開く →
-              </Link>
-            </div>
-
-            {/* ★追加：戦闘（タクティクス） */}
-            <div style={row}>
-              <div>
-                <div style={rowTitle}>共鳴フィールド・タクティクス</div>
-                <div style={rowSub}>/rooms/starleaf/tactics</div>
-              </div>
-
-              <Link href="/rooms/starleaf/tactics" style={goBtn}>
-                ▶ 戦闘開始
               </Link>
             </div>
           </div>
 
-          <div style={{ marginTop: 12, ...note }}>迷ったら HOME（入口）に戻る。</div>
-        </section>
-
-        {/* 次の復帰 */}
-        <section style={card}>
-          <div style={sectionTitle}>次の復帰（安全ロードマップ）</div>
-          <ol style={{ margin: "0 0 0 18px", padding: 0, lineHeight: 1.8, fontSize: 13, opacity: 0.9 }}>
-            <li>CSSだけで雰囲気を整える（今ここ）</li>
-            <li>演出・電子文字列は Client Component に分離して追加</li>
-            <li>“慈育”の庭（整枝）と、共鳴フィールド拡張</li>
-          </ol>
+          <div style={{ marginTop: 12, ...note }}>※ 休憩・個室はここには置かない（混線防止）。</div>
         </section>
       </div>
     </main>
