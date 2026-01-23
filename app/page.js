@@ -126,8 +126,9 @@ export default function Page() {
   const bg = (() => {
     if (screen === "PAUSE") return { background: "#ffffff", color: "#111827" };
     if (screen === "STARLEAF") return { background: "#050807", color: "#9AF59A" };
-    if (theme === "Nordic")
+    if (theme === "Nordic") {
       return { background: "linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%)", color: "#0f172a" };
+    }
     return {
       background:
         "radial-gradient(1200px 600px at 20% 10%, rgba(140,180,255,0.25) 0%, rgba(0,0,0,0) 55%), linear-gradient(180deg, #0b1020 0%, #0a0f1a 55%, #0d1424 100%)",
@@ -140,7 +141,7 @@ export default function Page() {
     margin: "0 auto",
     borderRadius: 18,
     padding: 16,
-    boxSizing: "border-box",
+    boxSizing: "border-box", // 念のため明示（親でもズレにくくする）
     overflow: "hidden",
     border: screen === "PAUSE" || theme === "Nordic" ? "1px solid rgba(0,0,0,0.1)" : "1px solid rgba(255,255,255,0.15)",
     background: screen === "PAUSE" || theme === "Nordic" ? "rgba(255,255,255,0.9)" : "rgba(12, 18, 36, 0.75)",
@@ -161,6 +162,7 @@ export default function Page() {
       textDecoration: "none",
       cursor: "pointer",
       border: "2px solid",
+      boxSizing: "border-box", // ★はみ出し対策の本丸（border込みで幅計算させる）
     };
 
     if (screen === "PAUSE") {
@@ -195,6 +197,7 @@ export default function Page() {
     fontWeight: 700,
     cursor: "pointer",
     border: "2px solid",
+    boxSizing: "border-box",
     borderColor: active ? (theme === "Nordic" ? "#0f172a" : "#9AF59A") : "rgba(128,128,128,0.3)",
     background: active ? (theme === "Nordic" ? "#0f172a" : "rgba(255,255,255,0.2)") : "transparent",
     color: active ? (theme === "Nordic" ? "#fff" : "#fff") : isStar ? "#9AF59A" : "inherit",
@@ -249,6 +252,7 @@ export default function Page() {
                       padding: "5px 10px",
                       borderRadius: 8,
                       border: "1px solid",
+                      boxSizing: "border-box",
                       background: houseTheme === "Nordic" ? "#000" : "transparent",
                       color: houseTheme === "Nordic" ? "#fff" : "inherit",
                     }}
@@ -261,6 +265,7 @@ export default function Page() {
                       padding: "5px 10px",
                       borderRadius: 8,
                       border: "1px solid",
+                      boxSizing: "border-box",
                       background: houseTheme === "Spaceship" ? "#fff" : "transparent",
                       color: houseTheme === "Spaceship" ? "#000" : "inherit",
                     }}
@@ -307,7 +312,7 @@ export default function Page() {
             <div style={{ display: "grid", gap: 15 }}>
               <div style={{ fontWeight: 900, color: "#9AF59A" }}>🌿 STAR LEAF DECK</div>
 
-              {/* 常時表示（ここが「出ない」対策の本丸：phaseに関係なく表示） */}
+              {/* 常時表示（phaseに関係なく表示） */}
               <button onClick={startOpening} style={btn()}>
                 ▶ テロップ開始（BGM）
               </button>
@@ -324,6 +329,7 @@ export default function Page() {
                     overflow: "hidden",
                     borderRadius: 15,
                     border: "2px solid #9AF59A",
+                    boxSizing: "border-box",
                   }}
                 >
                   <div
@@ -335,6 +341,7 @@ export default function Page() {
                       color: "#F6D34A",
                       animation: `crawlUp ${OPENING_MS}ms linear forwards`,
                       padding: 20,
+                      boxSizing: "border-box",
                     }}
                   >
                     <div style={{ fontSize: 20, fontWeight: 900 }}>EPISODE: NEW BREATH</div>
@@ -358,6 +365,7 @@ export default function Page() {
                       padding: "6px 10px",
                       cursor: "pointer",
                       fontWeight: 800,
+                      boxSizing: "border-box",
                     }}
                   >
                     SKIP
